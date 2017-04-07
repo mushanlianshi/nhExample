@@ -36,6 +36,7 @@
 		402026EA1E9743E200CE78AF /* LBNHSearchFriendsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 402026E91E9743E200CE78AF /* LBNHSearchFriendsCell.m */; };
 		402026ED1E9749B200CE78AF /* LBNHSearchPostsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 402026EC1E9749B200CE78AF /* LBNHSearchPostsCell.m */; };
 		402026F01E975B7B00CE78AF /* LBNHSearchLimitFriendsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 402026EF1E975B7B00CE78AF /* LBNHSearchLimitFriendsCell.m */; };
+		402026F31E9798CB00CE78AF /* LBNHSearchPostsCellFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 402026F21E9798CB00CE78AF /* LBNHSearchPostsCellFrame.m */; };
 		4023539D1E8B5188000DAE24 /* LBImageTitleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 4023539C1E8B5188000DAE24 /* LBImageTitleButton.m */; };
 		402353B41E8B810E000DAE24 /* NSBundle+TZImagePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 402353A01E8B810E000DAE24 /* NSBundle+TZImagePicker.m */; };
 		402353B51E8B810E000DAE24 /* TZAssetCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 402353A21E8B810E000DAE24 /* TZAssetCell.m */; };
@@ -358,6 +359,8 @@
 		402026EC1E9749B200CE78AF /* LBNHSearchPostsCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LBNHSearchPostsCell.m; sourceTree = "<group>"; };
 		402026EE1E975B7B00CE78AF /* LBNHSearchLimitFriendsCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LBNHSearchLimitFriendsCell.h; sourceTree = "<group>"; };
 		402026EF1E975B7B00CE78AF /* LBNHSearchLimitFriendsCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LBNHSearchLimitFriendsCell.m; sourceTree = "<group>"; };
+		402026F11E9798CB00CE78AF /* LBNHSearchPostsCellFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LBNHSearchPostsCellFrame.h; sourceTree = "<group>"; };
+		402026F21E9798CB00CE78AF /* LBNHSearchPostsCellFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LBNHSearchPostsCellFrame.m; sourceTree = "<group>"; };
 		4023539B1E8B5188000DAE24 /* LBImageTitleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LBImageTitleButton.h; sourceTree = "<group>"; };
 		4023539C1E8B5188000DAE24 /* LBImageTitleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LBImageTitleButton.m; sourceTree = "<group>"; };
 		4023539F1E8B810E000DAE24 /* NSBundle+TZImagePicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBundle+TZImagePicker.h"; sourceTree = "<group>"; };
@@ -2460,6 +2463,8 @@
 		40FB791D1E9653BF001B3D26 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				402026F11E9798CB00CE78AF /* LBNHSearchPostsCellFrame.h */,
+				402026F21E9798CB00CE78AF /* LBNHSearchPostsCellFrame.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -3068,6 +3073,7 @@
 				40A9C3A51E7FB2D00012D2DD /* LBNHCommonAPIConsant.m in Sources */,
 				4000B8C71E77881100D950C7 /* MJExtensionConst.m in Sources */,
 				40ECFEC21E8395C9008FF1BD /* LBNHCheckReportView.m in Sources */,
+				402026F31E9798CB00CE78AF /* LBNHSearchPostsCellFrame.m in Sources */,
 				4000B8D71E778F6D00D950C7 /* LBNHFileCacheManager.m in Sources */,
 				40ECFF0B1E83C68A008FF1BD /* README.md in Sources */,
 				40E1E7701E72A5DB00DB43EB /* AFHTTPSessionManager.m in Sources */,

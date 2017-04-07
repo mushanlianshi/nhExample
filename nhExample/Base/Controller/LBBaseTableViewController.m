@@ -62,7 +62,8 @@ static const char LBNHBaseTableControllRightHandlerKey;
         _tableView.delegate = self;
         _tableView.dataSource = self;
         _tableView.separatorColor = kSeparatorColor;
-        
+//        _tableView.estimatedRowHeight = 200;
+//        _tableView.rowHeight=UITableViewAutomaticDimension;
         [self.view addSubview:_tableView];
     }
     return _tableView;

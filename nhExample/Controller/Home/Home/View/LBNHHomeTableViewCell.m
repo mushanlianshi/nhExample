@@ -16,6 +16,8 @@
 #import "LBNHHomeCellFrame.h"
 #import "LBTips.h"
 #import "LBNHHomeGoldCommentView.h"
+#import "LBUtils.h"
+#import "LBNHSearchPostsCellFrame.h"
 
 #define kBottomBtnTextColor [UIColor colorWithRed:0.55f green:0.55f blue:0.55f alpha:1.00f]
 
@@ -74,7 +76,7 @@ static const NSInteger kLittleImageStartTag = 100;
 /** 底部赞的状态栏 */
 //@property (nonatomic, strong) LBNHHomeThumBottomBarView *bottonBarView;
 
-
+@property (nonatomic, copy) NSString *keyWords;
 
 @end
 
@@ -97,13 +99,24 @@ static const NSInteger kLittleImageStartTag = 100;
     return self;
 }
 
+-(void)setCellFrame:(LBNHHomeCellFrame *)cellFrame keyWords:(NSString *)keyWords{
+    _keyWords = keyWords;
+    [self setCellFrame:cellFrame];
+}
+
 -(void)setCellFrame:(LBNHHomeCellFrame *)cellFrame{
     if (_cellFrame == cellFrame && _cellFrame) {
         return ;
     }
     _cellFrame = cellFrame;
-    LBNHHomeServiceDataElement *element = cellFrame.model;
-    if (element.group == nil) {
+    LBNHHomeServiceDataElementGroup *group ;
+    //注意判断的先后顺序
+     if ([cellFrame isKindOfClass:[LBNHSearchPostsCellFrame class]]){
+        group = [(LBNHSearchPostsCellFrame *)cellFrame group];
+     }else if ([cellFrame isKindOfClass:[LBNHHomeCellFrame class]]) {
+         group = cellFrame.model.group;
+     }
+    if (group == nil) {
         return;
     }
     [self removeImageView];
@@ -115,9 +128,9 @@ static const NSInteger kLittleImageStartTag = 100;
         self.careButton = nil ;
     }
     
-    NSLog(@"element.group.status_desc IS %@ ",element.group.status_desc);
+    NSLog(@"group.status_desc IS %@ ",group.status_desc);
     //1.热门
-    if ([element.group.status_desc containsString:@"热门"]) {
+    if ([group.status_desc containsString:@"热门"]) {
         self.hotLabel.text = @"热门";
         self.hotLabel.frame = cellFrame.hotLabelFrame;
     }else{
@@ -126,35 +139,38 @@ static const NSInteger kLittleImageStartTag = 100;
     }
     
     self.iconView.frame = cellFrame.iconViewFrame;
-    [self.iconView setImagePath:element.group.user.avatar_url placeHolder:nil];
+    [self.iconView setImagePath:group.user.avatar_url placeHolder:nil];
     
-    self.titleLabel.text = element.group.user.name;
+    self.titleLabel.text = group.user.name;
     self.titleLabel.frame = cellFrame.titleLabelFrame;
     
-    self.contentLabel.text = element.group.content;
+    self.contentLabel.text = group.content;
+    if (self.keyWords && self.keyWords.length >0) {
+        self.contentLabel.attributedText = [LBUtils attributeWithString:group.content keyWords:self.keyWords font:self.contentLabel.font highLightColor:kCommonHighLightRedColor textColor:self.contentLabel.textColor lineSpace:0];
+    }
     self.contentLabel.frame = cellFrame.contentLabelFrame;
     
-    [self.laughButton setTitle:element.group.category_name forState:UIControlStateNormal];
+    [self.laughButton setTitle:group.category_name forState:UIControlStateNormal];
     self.laughButton.frame = cellFrame.laughButtonFrame;
     
-    switch (element.group.media_type) {
+    switch (group.media_type) {
         case LBNHHomeServiceDataMediaTypeLargeImage:
             {
-                LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =element.group.large_image.url_list.firstObject;
+                LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =group.large_image.url_list.firstObject;
                 [self.bigPicture setImagePath:imageUrlModel.url placeHolder:nil];
                 self.bigPicture.frame = cellFrame.bigPictureFrame;
             }
             break;
         case LBNHHomeServiceDataMediaTypeGif:
         {
-            LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =element.group.large_image.url_list.firstObject;
+            LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =group.large_image.url_list.firstObject;
             [self.gifPicture setImagePath:imageUrlModel.url placeHolder:nil];
             self.gifPicture.frame = cellFrame.gifPictureFrame;
         }
             break;
         case LBNHHomeServiceDataMediaTypeVideo:
         {
-            LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =element.group.large_cover.url_list.firstObject;
+            LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =group.large_cover.url_list.firstObject;
             [self.videCoverIV setImagePath:imageUrlModel.url placeHolder:nil];
             self.videCoverIV.frame = cellFrame.videoCoverFrame;
         }
@@ -162,7 +178,7 @@ static const NSInteger kLittleImageStartTag = 100;
         case LBNHHomeServiceDataMediaTypeLittleImages:
         {
             for (int i =0 ; i < cellFrame.littleImagesFrameArray.count; i++) {
-                LBNHHomeServiceDataElementGroupLargeImage *image = element.group.thumb_image_list[i];
+                LBNHHomeServiceDataElementGroupLargeImage *image = group.thumb_image_list[i];
                 NSString *rectString = cellFrame.littleImagesFrameArray[i];
                 LBNHBaseImageView *imageView = nil ;
                 if (image.is_gif) {
@@ -199,33 +215,33 @@ static const NSInteger kLittleImageStartTag = 100;
         }
     }
     
-    [self.thumButton setTitle:[self dealCountWithForrmater:element.group.digg_count] forState:UIControlStateNormal];
+    [self.thumButton setTitle:[self dealCountWithForrmater:group.digg_count] forState:UIControlStateNormal];
     //如果已经定过  高亮图片
-    [self.thumButton setImage:ImageNamed(element.group.user_digg?@"digupicon_textpage_press":@"digupicon_textpage") forState:UIControlStateNormal];
-    [self.thumButton setTitleColor:(element.group.user_digg?kCommonHighLightRedColor:kCommonGrayTextColor) forState:UIControlStateNormal];
+    [self.thumButton setImage:ImageNamed(group.user_digg?@"digupicon_textpage_press":@"digupicon_textpage") forState:UIControlStateNormal];
+    [self.thumButton setTitleColor:(group.user_digg?kCommonHighLightRedColor:kCommonGrayTextColor) forState:UIControlStateNormal];
     self.thumButton.frame = cellFrame.thumButtonFrame;
     
     //踩
-    [self.stepButton setTitle:[self dealCountWithForrmater:element.group.digg_count] forState:UIControlStateNormal];
+    [self.stepButton setTitle:[self dealCountWithForrmater:group.bury_count] forState:UIControlStateNormal];
     //如果已经定过  高亮图片
-    [self.stepButton setImage:ImageNamed(element.group.bury_count?@"digdownicon_textpage_press":@"digdownicon_textpage") forState:UIControlStateNormal];
-    [self.stepButton setTitleColor:(element.group.user_bury?kCommonHighLightRedColor:kCommonGrayTextColor) forState:UIControlStateNormal];
+    [self.stepButton setImage:ImageNamed(group.bury_count?@"digdownicon_textpage_press":@"digdownicon_textpage") forState:UIControlStateNormal];
+    [self.stepButton setTitleColor:(group.user_bury?kCommonHighLightRedColor:kCommonGrayTextColor) forState:UIControlStateNormal];
     self.stepButton.frame = cellFrame.stepButtonFrame;
     
     
     //评论
-    [self.commentButton setTitle:[self dealCountWithForrmater:element.group.comment_count] forState:UIControlStateNormal];
+    [self.commentButton setTitle:[self dealCountWithForrmater:group.comment_count] forState:UIControlStateNormal];
     //如果已经定过  高亮图片
     self.commentButton.frame = cellFrame.commentButtonFrame;
     
-    [self.shareButton setTitle:[self dealCountWithForrmater:element.group.share_count] forState:UIControlStateNormal];
+    [self.shareButton setTitle:[self dealCountWithForrmater:group.share_count] forState:UIControlStateNormal];
     //如果已经定过  高亮图片
     self.shareButton.frame = cellFrame.shareButtonFrame;
     
     self.bottomView.frame = cellFrame.bottomViewFrame;
     
 //    self.bottonBarView.frame = cellFrame.thumBottomFrame;
-//    [self.bottonBarView setThums:element.group.user_digg steps:element.group.user_bury comments:element.group.user_repin];
+//    [self.bottonBarView setThums:group.user_digg steps:group.user_bury comments:group.user_repin];
     
     
 }

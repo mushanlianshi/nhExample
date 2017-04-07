@@ -78,6 +78,7 @@
 
 @property (nonatomic, strong) LBNHHomeServiceDataElement *model;
 
+
 /** 记录是不是详情页的 */
 @property (nonatomic, assign) BOOL isDetail;
 

@@ -83,13 +83,11 @@ NSInteger const kSearchCellMargin = 15;
         _iconView = [[LBNHBaseImageView alloc] init];
         [self.contentView addSubview:_iconView];
         _iconView.layerCornerRadius = 22;
-        WS(weakSelf);
-        WeakObject(weakIcon, _iconView);
-        [_iconView addTapBlock:^{
-            if ([weakSelf.delegate respondsToSelector:@selector(attentionListCell:userIconTapped:)]) {
-                [weakSelf.delegate attentionListCell:weakSelf userIconTapped:weakIcon];
-            }
-        }];
+//        WS(weakSelf);
+//        WeakObject(weakIcon, _iconView);
+//        [_iconView addTapBlock:^{
+//
+//        }];
     }
     return _iconView;
 }

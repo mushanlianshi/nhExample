@@ -40,4 +40,16 @@
 /** 截屏 */
 + (UIImage *)screenshot;
 
+
+/**
+ * 获取一个富文本
+ @param string 总文字
+ @param keyWords 需要高亮的文字
+ @param font 默认字体大小
+ @param highLightColor 高亮的颜色
+ @param textColor 默认的颜色
+ @param lineSpace 字间距
+ */
++ (NSAttributedString *)attributeWithString:(NSString *)string keyWords:(NSString *)keyWords font:(UIFont *)font highLightColor:(UIColor *)highLightColor textColor:(UIColor *)textColor lineSpace:(CGFloat)lineSpace;
+
 @end

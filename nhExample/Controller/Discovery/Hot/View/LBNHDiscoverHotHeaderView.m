@@ -55,6 +55,7 @@ NSInteger   const kHotMaxSections = 100; //一个设置最大indexpath的section
     
     [self addTimer];
     
+    [self.collectionView reloadData];
     //设置collectionView默认显示中间那组
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:kHotMaxSections/2];
     [self.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:NO];

@@ -130,4 +130,37 @@
 }
 
 
++(NSAttributedString *)attributeWithString:(NSString *)string keyWords:(NSString *)keyWords font:(UIFont *)font highLightColor:(UIColor *)highLightColor textColor:(UIColor *)textColor lineSpace:(CGFloat)lineSpace{
+    if (string.length) {
+        NSMutableAttributedString *attributeString = [[NSMutableAttributedString alloc] initWithString:string];
+        NSRange keyRange = [string rangeOfString:keyWords];
+        //1.没有关键字  只处理设置的属性
+        if (!keyWords || keyWords.length == 0 || keyRange.location == NSNotFound) {
+            NSRange allRange = [string rangeOfString:string];
+            [attributeString addAttribute:NSForegroundColorAttributeName value:textColor range:allRange];
+            [attributeString addAttribute:NSFontAttributeName value:font range:allRange];
+            
+            //间距的属性
+            NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
+            style.lineSpacing = lineSpace;
+            [attributeString addAttribute:NSParagraphStyleAttributeName value:style range:allRange];
+            return attributeString.copy;
+        }else{
+            NSRange allRange = NSMakeRange(0, string.length);
+            [attributeString addAttribute:NSFontAttributeName value:font range:allRange];
+            [attributeString addAttribute:NSForegroundColorAttributeName value:textColor range:allRange];
+            [attributeString addAttribute:NSForegroundColorAttributeName value:highLightColor range:keyRange];
+            
+            //间距的属性
+            NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
+            style.lineSpacing = lineSpace;
+
+            [attributeString addAttribute:NSParagraphStyleAttributeName value:style range:allRange];
+            return attributeString.copy;
+        }
+        
+    }
+    return [[NSAttributedString alloc] init];
+}
+
 @end

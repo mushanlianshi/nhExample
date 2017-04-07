@@ -55,6 +55,9 @@ typedef NS_ENUM(NSInteger, LBThumBottomClickItemType){
 
 @property (nonatomic, weak) id <LBNHHomeTableViewCellDelegate> delegate;
 
+/** 搜索界面用的方法 */
+-(void)setCellFrame:(LBNHHomeCellFrame *)cellFrame keyWords:(NSString *)keyWords;
+
 /** 设置赞按钮的动画 */
 -(void)didDigg;
 

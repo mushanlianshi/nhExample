@@ -18,8 +18,11 @@
 #import "LBNHDiscoveryHotCell.h"
 #import "LBNHSearchPostsCell.h"
 #import "LBNHSearchLimitFriendsCell.h"
+#import "LBNHPersonalCenterController.h"
+#import "UITableView+FDTemplateLayoutCell.h"
+#import "LBNHSearchPostsCellFrame.h"
 
-@interface LBNHSearchController ()<UITextFieldDelegate>
+@interface LBNHSearchController ()<UITextFieldDelegate,LBNHHomeTableViewCellDelegate,LBNHSearchLimitFriendsCellDelegate>
 
 @property (nonatomic, copy) NSString *keyWords;
 
@@ -30,17 +33,23 @@
 /** 热吧栏目搜索的结果 */
 @property (nonatomic, strong) NSMutableArray *hotColumnsArray;
 
+
 /** 搜索到的文字帖子数组 */
 @property (nonatomic, strong) NSMutableArray *textPostsArray;
+@property (nonatomic, strong) NSMutableArray *textPostsCellFrameArray;
 
 /** 搜索到的图片帖子数组 */
 @property (nonatomic, strong) NSMutableArray *imagePostsArray;
+@property (nonatomic, strong) NSMutableArray *imagePostsCellFrameArray;
 
 /** 搜索到的视频帖子数组 */
 @property (nonatomic, strong) NSMutableArray *videoPostsArray;
+@property (nonatomic, strong) NSMutableArray *videoPostsCellFrameArray;
 
 /** 好友是否展开   如果展开只显示他自己  否则都显示 */
 @property (nonatomic, assign) BOOL isFirendLineExpand;
+
+
 
 @end
 
@@ -48,9 +57,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
     [self initNaviItems];
     [self showNoDataView];
     [self addObserverNotifications];
+    [self.tableView registerClass:[LBNHHomeTableViewCell class] forCellReuseIdentifier:@"LBNHHomeTableViewCell"];
 }
 
 
@@ -61,7 +72,13 @@
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.leftTextField];
     WS(weakSelf);
     [self setRightNaviItemTitle:@"取消" rightHandler:^(NSString *titleString) {
-        [weakSelf pop];
+        //如果展开就闭上
+        if (weakSelf.isFirendLineExpand) {
+            weakSelf.isFirendLineExpand = NO;
+            [weakSelf lb_reloadData];
+        }else{
+            [weakSelf pop];
+        }
     }];
 }
 
@@ -115,6 +132,23 @@
             self.textPostsArray = [LBNHHomeServiceDataElementGroup modelArrayWithArray:response[@"text"]];
             self.imagePostsArray = [LBNHHomeServiceDataElementGroup modelArrayWithArray:response[@"image"]];
             self.videoPostsArray = [LBNHHomeServiceDataElementGroup modelArrayWithArray:response[@"video"]];
+            for (LBNHHomeServiceDataElementGroup *group in self.textPostsArray) {
+                LBNHSearchPostsCellFrame *cellFrame = [[LBNHSearchPostsCellFrame alloc] init];
+                cellFrame.group = group;
+                [self.textPostsCellFrameArray addObject:cellFrame];
+            }
+            
+            for (LBNHHomeServiceDataElementGroup *group in self.imagePostsArray) {
+                LBNHSearchPostsCellFrame *cellFrame = [[LBNHSearchPostsCellFrame alloc] init];
+                cellFrame.group = group;
+                [self.imagePostsCellFrameArray addObject:cellFrame];
+            }
+            
+            for (LBNHHomeServiceDataElementGroup *group in self.videoPostsArray) {
+                LBNHSearchPostsCellFrame *cellFrame = [[LBNHSearchPostsCellFrame alloc] init];
+                cellFrame.group = group;
+                [self.videoPostsCellFrameArray addObject:cellFrame];
+            }
         }
         dispatch_group_leave(group);
     }];
@@ -127,7 +161,7 @@
     [columnRequest lb_sendRequestWithHandler:^(BOOL success, id response, NSString *message) {
         NSLog(@"LBLog search 段友栏目结束");
         if (success) {
-            self.hotColumnsArray = [LBNHDiscoveryCategoryElement modelArrayWithArray:message];
+            self.hotColumnsArray = [LBNHDiscoveryCategoryElement modelArrayWithArray:response];
         }
         dispatch_group_leave(group);
     }];
@@ -146,6 +180,9 @@
     [self.textPostsArray removeAllObjects];
     [self.imagePostsArray removeAllObjects];
     [self.videoPostsArray removeAllObjects];
+    [self.textPostsCellFrameArray removeAllObjects];
+    [self.imagePostsCellFrameArray removeAllObjects];
+    [self.videoPostsCellFrameArray removeAllObjects];
 }
 
 
@@ -215,21 +252,27 @@
         LBNHSearchLimitFriendsCell *cell = [self.tableView dequeueReusableCellWithIdentifier:@"limitCell"];
         if (!cell) {
             cell = [[LBNHSearchLimitFriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"limitCell"];
+            cell.delegate = self;
         }
         [cell setModelsArray:self.dataArray keyWords:self.keyWords];
+        return cell;
     }
     
-    LBNHSearchPostsCell *cell = [self.tableView dequeueReusableCellWithIdentifier:@"postCell"];
+//    LBNHSearchPostsCell *cell = [self.tableView dequeueReusableCellWithIdentifier:@"postCell" ];
+    LBNHHomeTableViewCell *cell = [self.tableView dequeueReusableCellWithIdentifier:@"LBNHHomeTableViewCell" forIndexPath:indexPath];
     if (!cell) {
-        cell = [[LBNHSearchPostsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"postCell"];
+        cell = [[LBNHHomeTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"LBNHSearchPostsCell"];
     }
+    cell.delegate = self;
+    LBNHSearchPostsCellFrame *cellFrame;
     if (indexPath.section == 2) {
-        cell.group = self.textPostsArray[indexPath.row];
+        cellFrame = self.textPostsCellFrameArray[indexPath.row];
     }else if (indexPath.section ==3){
-        cell.group = self.imagePostsArray[indexPath.row];
+        cellFrame = self.imagePostsCellFrameArray[indexPath.row];
     }else if (indexPath.section == 4){
-        cell.group = self.videoPostsArray[indexPath.row];
+        cellFrame = self.videoPostsCellFrameArray[indexPath.row];
     }
+    [cell setCellFrame:cellFrame keyWords:self.keyWords];
     return cell;
 }
 
@@ -246,16 +289,25 @@
         return 75;
     }
     if (indexPath.section == 1) {
+        if (self.dataArray.count == 0) return 0;
         if (self.dataArray.count ==1) {
             return 75;
         }else{
             return 150;
         }
     }
-    
-    
-    
-    return 0;
+    LBNHHomeCellFrame *cellFrame;
+    if (indexPath.section == 2) {
+        cellFrame = self.textPostsCellFrameArray[indexPath.row];
+    }
+    if (indexPath.section == 3) {
+        cellFrame = self.imagePostsCellFrameArray[indexPath.row];
+    }
+    if (indexPath.section == 4) {
+        cellFrame = self.videoPostsCellFrameArray[indexPath.row];
+    }
+    NSLog(@"cellFrame is %f ",cellFrame.cellHeight);
+    return cellFrame.cellHeight;
 }
 
 /** 某个组头*/
@@ -266,6 +318,7 @@
     label.font = kFont(14);
     if (self.isFirendLineExpand) {
         label.text = @"段友搜索";
+        return label;
     }
     if (section == 0) {
         label.text = @" 热门栏目";
@@ -308,6 +361,22 @@
     }
     
     return 0;
+}
+
+#pragma mark limitCell 的点击回调
+
+/** 前面好友点击了 */
+-(void)searchLimitFriendsCell:(LBNHSearchLimitFriendsCell *)cell clickedIndex:(NSInteger)index{
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    LBNHPersonalCenterController *personVC = [[LBNHPersonalCenterController alloc] initWithUserInfo:self.dataArray[indexPath.row]];
+    [self pushToVc:personVC];
+}
+
+
+/** 更多按钮点击了 */
+-(void)searchLimitFriendsMoreClicked:(LBNHSearchLimitFriendsCell *)cell{
+    self.isFirendLineExpand = YES;
+    [self lb_reloadData];
 }
 
 
@@ -358,6 +427,25 @@
 
 -(void)dealloc{
     [self removeObserverNotifications];
+}
+
+-(NSMutableArray *)imagePostsCellFrameArray{
+    if (!_imagePostsCellFrameArray) {
+        _imagePostsCellFrameArray = [NSMutableArray new];
+    }
+    return _imagePostsCellFrameArray;
+}
+-(NSMutableArray *)textPostsCellFrameArray{
+    if (!_textPostsCellFrameArray) {
+        _textPostsCellFrameArray = [NSMutableArray new];
+    }
+    return _textPostsCellFrameArray;
+}
+-(NSMutableArray *)videoPostsCellFrameArray{
+    if (!_videoPostsCellFrameArray) {
+        _videoPostsCellFrameArray = [NSMutableArray new];
+    }
+    return _videoPostsCellFrameArray;
 }
 
 @end
