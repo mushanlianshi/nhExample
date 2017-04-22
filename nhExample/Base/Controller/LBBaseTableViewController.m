@@ -42,9 +42,15 @@ static const char LBNHBaseTableControllRightHandlerKey;
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
     UIWindow *window = [UIApplication sharedApplication].keyWindow;
-    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(kScreenWidth -  80, kNavibarHeight+30, 60, 30)];
-    fpsLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
-    [window addSubview:fpsLabel];
+    YYFPSLabel *fpsLabel = [window viewWithTag:1011];
+    
+    if (!fpsLabel) {
+        fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(kScreenWidth -  80, kNavibarHeight+30, 60, 30)];
+        fpsLabel.tag = 1011;
+        fpsLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
+        [window addSubview:fpsLabel];
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning {

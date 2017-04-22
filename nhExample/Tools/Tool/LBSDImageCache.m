@@ -17,7 +17,7 @@
 }
 
 +(void)downLoadImageWithUrl:(NSString *)imageUrl progress:(void (^)(NSInteger receivedSize, NSInteger expectedSize))progress completed:(void (^)(UIImage *image, NSData *data, NSError *error, BOOL finished))completed{
-    //SDWebImageDownloaderUseNSURLCache 默认不适用url路径缓存图片  我们制定使用url路径来缓存图片
+    //SDWebImageDownloaderUseNSURLCache 默认不适用url路径缓存图片  我们制定使用url路径来缓存图片//, NSURL * _Nullable targetURL
     [[SDWebImageDownloader sharedDownloader] downloadImageWithURL:[NSURL URLWithString:imageUrl] options:SDWebImageDownloaderUseNSURLCache progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
         if (progress) {
             progress(receivedSize, expectedSize);

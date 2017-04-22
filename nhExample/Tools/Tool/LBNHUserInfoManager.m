@@ -27,6 +27,14 @@
     [LBNHFileCacheManager saveUserData:@(YES) forKey:KNHIsLoginFlag];
 }
 
+/**
+ * 登录成功  保存用户信息 根据字典数据保存
+ */
+-(void)didLoginInWithUserInfoDic:(NSDictionary *)userInfoDic{
+    LBNHUserInfoModel *userInfo = [LBNHUserInfoModel modelWithDictionary:userInfoDic];
+    [self didLoginInWithUserInfo:userInfo];
+}
+
 
 /**
  * 退出账号

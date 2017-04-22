@@ -8,6 +8,7 @@
 
 #import "LBNHHomeCellFrame.h"
 #import "LBBaseTableViewController.h"
+#import "LBNHSearchPostsCellFrame.h"
 
 
 /**
@@ -18,5 +19,8 @@
 
 /** 通过cellframe来实例化 因为cellframe里有数据模型 */
 -(instancetype)initWithCellFrame:(LBNHHomeCellFrame *)cellFrame;
+
+/** 搜索结果跳转过来的方法 */
+-(instancetype)initWithSearchCellFrame:(LBNHSearchPostsCellFrame *)searchCellFrame;
 
 @end

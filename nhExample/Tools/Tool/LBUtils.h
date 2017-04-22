@@ -52,4 +52,45 @@
  */
 + (NSAttributedString *)attributeWithString:(NSString *)string keyWords:(NSString *)keyWords font:(UIFont *)font highLightColor:(UIColor *)highLightColor textColor:(UIColor *)textColor lineSpace:(CGFloat)lineSpace;
 
+
+/**
+ * 获取广告标示
+ @return 广告标示
+ */
++ (NSString *)idfa;
+
+
+/**
+ * 替代UDID的 同一个设备 同一个应用的idfv是一样的
+ */
++ (NSString *)idfv;
+
+//,翻译过来就是通用唯一标识符。是一个32位的十六进制序列  每秒都不一样的
++ (NSString *)uuid;
+
+/**
+ * 颜色转成图片
+ */
++ (UIImage *)imageWithColor:(UIColor *)color;
+
+/**
+ *  判断字符串是否为空
+ */
++ (BOOL)isBlankString:(NSString *)string;
+
+/** 获取某路径下文件的大小 */
++(float)folderSizeAtPath:(NSString *)path;
+
+/** 清楚某路径下的文件 */
++(void)clearCache:(NSString *)path;
+
+/** 每次启动调用保存app启动时间的方法 用来判断两次启动时间间隔的 */
++(void)saveLastLaunchAPPTime;
+
+/** 获取上次启动app的时间  距离1970 */
++(long)lastLaunchAPPTime;
+
+/** 获取两次启动的时间差 */
++(long)lastLauchAPPToNow;
+
 @end

@@ -54,6 +54,8 @@ static UIApplication *_YYSharedApplication() {
         }
         manager = [[self alloc] initWithCache:cache queue:queue];
     });
+    
+    
     return manager;
 }
 

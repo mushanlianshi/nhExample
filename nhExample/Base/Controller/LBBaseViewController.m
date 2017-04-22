@@ -47,9 +47,7 @@
 //    }
 }
 
--(void)dealloc{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
+
 
 -(void)loadDataSucess{
     [self hideLoadingAnimation];
@@ -180,6 +178,12 @@
 
 -(BOOL)isNetworkReachable{
     return [[AFNetworkReachabilityManager sharedManager] isReachable];
+}
+
+
+-(void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    MyLog(@"LBLog %@  dealloc ==========",NSStringFromClass([self class]));
 }
 
 @end

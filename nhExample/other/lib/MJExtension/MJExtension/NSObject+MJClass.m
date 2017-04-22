@@ -77,7 +77,7 @@ static NSMutableDictionary *ignoredCodingPropertyNamesDict_;
     
     // 4.开始遍历每一个类
     while (c && !stop) {
-        // 4.1.执行操作
+        // 4.1.执行操作 回调回去  当stop的地址还不知YES时  还会再次调用这个方法
         enumeration(c, &stop);
         
         // 4.2.获得父类

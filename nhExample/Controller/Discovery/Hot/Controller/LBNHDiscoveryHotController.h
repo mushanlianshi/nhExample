@@ -9,9 +9,13 @@
 #import "LBBaseTableViewController.h"
 
 
+typedef void(^LBDiscoveryHotScrollviewOffsetPoint)(CGPoint point);
+
 /**
  * 热吧的controller
  */
 @interface LBNHDiscoveryHotController : LBBaseTableViewController
+
+@property (nonatomic, copy) LBDiscoveryHotScrollviewOffsetPoint scrollOffsetPoint;
 
 @end

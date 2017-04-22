@@ -17,4 +17,16 @@
 /** 是否登录的标示 */
 UIKIT_EXTERN NSString *const KNHIsLoginFlag;
 
+/** 应用启动时间的标示 */
+UIKIT_EXTERN NSString *const KAPPLaunchTime;
+
+
+/** 两次应用启动时间差  用来判断是否清楚SDWebimage的缓存 */
+extern NSInteger const KAPPLaunchTimeOffset;
+
+extern NSString *const KAPPADInfoKey;
+
+/** 定义的一周时间 */
+UIKIT_EXTERN NSInteger const KOneWeek;
+
 @end

@@ -42,7 +42,7 @@
 
 
 /**
- 将属性名换成其他值 去字典里取值
+ 将属性名video_360P换成其他值 去字典里取360p_video值
  */
 + (NSDictionary *)mj_replacedKeyFromPropertyName {
     return @{

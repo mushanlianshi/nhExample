@@ -26,6 +26,8 @@
 #import "LBNHHomePublishController.h"
 #import "LBNHFileCacheManager.h"
 #import "LBShareBottomView.h"
+#import "LBCustomLongImageView.h"
+
 
 @interface LBNHHomeBaseViewController ()<LBNHHomeTableViewCellDelegate,SDPhotoBrowserDelegate,WMPlayerDelegate>
 
@@ -93,7 +95,10 @@
         self.request = request;
     }
     [self loadData];
+    
 }
+
+
 
 
 #pragma mark 刷新数据 加载更多
@@ -285,7 +290,7 @@
 
 
 /** 点浏览大图的回调  点击的索引  以及urls */
--(void)homeTableViewCell:(LBNHHomeTableViewCell *)cell didClickedImageView:(UIImageView *)imageView currentIndex:(NSInteger)currentIndex urls:(NSArray <NSURL *>*)urls{
+-(void)homeTableViewCell:(LBNHHomeTableViewCell *)cell didClickedImageView:(LBCustomLongImageView *)imageView currentIndex:(NSInteger)currentIndex urls:(NSArray <NSURL *>*)urls{
     SDPhotoBrowser *photoBrowser = [[SDPhotoBrowser alloc] init];
     photoBrowser.delegate = self;
     photoBrowser.currentImageIndex = currentIndex;
@@ -293,11 +298,19 @@
 //    photoBrowser.sourceImagesContainerView = imageView;
     photoBrowser.currentImageView = imageView;
     self.littleImagesURLs = urls;
-    self.selectedImage = imageView.image;
+    self.selectedImage = imageView.originalLongImage ? imageView.originalLongImage : imageView.image;
+    
     [photoBrowser show];
 }
 
-
+///** 默认显示的图片  不是高质量的 */
+//- (UIImage *)photoBrowser:(SDPhotoBrowser *)browser placeholderImageForIndex:(NSInteger)index{
+//    
+//}
+///** 显示高质量图片的url */
+//- (NSURL *)photoBrowser:(SDPhotoBrowser *)browser highQualityImageURLForIndex:(NSInteger)index{
+//    return self.littleImagesURLs[index];
+//}
 /** 点播放视频的回调 */
 -(void)homeTableViewCell:(LBNHHomeTableViewCell *)cell didClickedVideo:(NSString *)videoUrl videoCoverImage:(LBNHBaseImageView *)coverImageView{
     self.videoIndexPath = [self.tableView indexPathForCell:cell];

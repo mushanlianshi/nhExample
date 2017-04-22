@@ -13,5 +13,7 @@
 @property (strong, nonatomic) UIWindow *window;
 
 
+@property (nonatomic, copy) NSMutableArray *testArray;
+
 @end
 

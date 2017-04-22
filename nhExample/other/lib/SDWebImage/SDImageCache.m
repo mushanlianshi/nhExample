@@ -15,6 +15,7 @@
 #import "NSImage+WebCache.h"
 
 // See https://github.com/rs/SDWebImage/pull/1141 for discussion
+/** 自己定义的缓存的类 */
 @interface AutoPurgeCache : NSCache
 @end
 
@@ -38,7 +39,7 @@
 
 @end
 
-
+/** 计算图片缓存占用的内存大小 */
 FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
 #if SD_MAC
     return image.size.height * image.size.width;
@@ -78,6 +79,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
 }
 
 - (nonnull instancetype)initWithNamespace:(nonnull NSString *)ns {
+    //Library/caches/ns 拼接ns路径
     NSString *path = [self makeDiskCachePath:ns];
     return [self initWithNamespace:ns diskCacheDirectory:path];
 }
@@ -160,10 +162,12 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     return [path stringByAppendingPathComponent:filename];
 }
 
+//获取默认的缓存路径
 - (nullable NSString *)defaultCachePathForKey:(nullable NSString *)key {
     return [self cachePathForKey:key inPath:self.diskCachePath];
 }
 
+/** 把图片的路径http://p3.pstatp.com/medium/1a6a0009cae5377527bc 转成md5值 59280b71e5d3626b3a44cb77c5d17049*/
 - (nullable NSString *)cachedFileNameForKey:(nullable NSString *)key {
     const char *str = key.UTF8String;
     if (str == NULL) {
@@ -178,6 +182,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     return filename;
 }
 
+/** 获取cache下的路径 */
 - (nullable NSString *)makeDiskCachePath:(nonnull NSString*)fullNamespace {
     NSArray<NSString *> *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     return [paths[0] stringByAppendingPathComponent:fullNamespace];
@@ -220,6 +225,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
             NSData *data = imageData;
             
             if (!data && image) {
+                /** 获取图片格式 data不存在就是没定义 */
                 SDImageFormat imageFormatFromData = [NSData sd_imageFormatForImageData:data];
                 data = [image sd_imageDataAsFormat:imageFormatFromData];
             }
@@ -245,6 +251,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     
     [self checkIfQueueIsIOQueue];
     
+    //创建路径
     if (![_fileManager fileExistsAtPath:_diskCachePath]) {
         [_fileManager createDirectoryAtPath:_diskCachePath withIntermediateDirectories:YES attributes:nil error:NULL];
     }
@@ -253,7 +260,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     NSString *cachePathForKey = [self defaultCachePathForKey:key];
     // transform to NSUrl
     NSURL *fileURL = [NSURL fileURLWithPath:cachePathForKey];
-    
+    //保存图片数据
     [_fileManager createFileAtPath:cachePathForKey contents:imageData attributes:nil];
     
     // disable iCloud backup
@@ -271,6 +278,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
         // fallback because of https://github.com/rs/SDWebImage/pull/976 that added the extension to the disk file name
         // checking the key with and without the extension
         if (!exists) {
+            NSString *path = [self defaultCachePathForKey:key].stringByDeletingPathExtension;
             exists = [_fileManager fileExistsAtPath:[self defaultCachePathForKey:key].stringByDeletingPathExtension];
         }
 
@@ -282,12 +290,16 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     });
 }
 
+// 获取缓存中是否有图片
 - (nullable UIImage *)imageFromMemoryCacheForKey:(nullable NSString *)key {
     return [self.memCache objectForKey:key];
 }
 
+// 获取磁盘缓存中是否有图片
 - (nullable UIImage *)imageFromDiskCacheForKey:(nullable NSString *)key {
+    /** 在硬盘中查是否有图片的缓存 */
     UIImage *diskImage = [self diskImageForKey:key];
+    //根据是否设置内存缓存  设置缓存
     if (diskImage && self.config.shouldCacheImagesInMemory) {
         NSUInteger cost = SDCacheCostForImage(diskImage);
         [self.memCache setObject:diskImage forKey:key cost:cost];
@@ -308,6 +320,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
     return image;
 }
 
+/** 在内存中查找key对应的图片 */
 - (nullable NSData *)diskImageDataBySearchingAllPathsForKey:(nullable NSString *)key {
     NSString *defaultPath = [self defaultCachePathForKey:key];
     NSData *data = [NSData dataWithContentsOfFile:defaultPath];
@@ -344,8 +357,10 @@ FOUNDATION_STATIC_INLINE NSUInteger SDCacheCostForImage(UIImage *image) {
 - (nullable UIImage *)diskImageForKey:(nullable NSString *)key {
     NSData *data = [self diskImageDataBySearchingAllPathsForKey:key];
     if (data) {
+        // 获取图片
         UIImage *image = [UIImage sd_imageWithData:data];
         image = [self scaledImageForKey:key image:image];
+        //图片是否压缩
         if (self.config.shouldDecompressImages) {
             image = [UIImage decodedImageWithImage:image];
         }

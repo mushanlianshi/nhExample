@@ -9,10 +9,13 @@
 #import "LBDiscoveryCategoryController.h"
 #import "LBDiscoverCategoryRequest.h"
 #import "LBNHHomeBaseViewController.h"
+#import "LBNHDiscoveryModel.h"
 
 @interface LBDiscoveryCategoryController ()
 
 @property (nonatomic, assign) NSInteger categoryId;
+
+@property (nonatomic, strong) LBNHDiscoveryCategoryElement *element;
 
 @end
 
@@ -24,6 +27,9 @@
     [self loadData];
 }
 -(void)setUpNaviITtem{
+    if (self.element.name) {
+        self.navItemTitle = self.element.name;
+    }
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:ImageNamed(@"submission") style:UIBarButtonItemStylePlain target:self action:@selector(rightItemClicked)];
 }
 
@@ -39,10 +45,18 @@
     return self;
 }
 
+-(instancetype)initWithCategoryElement:(LBNHDiscoveryCategoryElement *)element{
+    self = [super init];
+    if (self) {
+        self.element = element;
+    }
+    return self;
+}
+
 -(void)loadData{
     LBDiscoverCategoryRequest *request = [LBDiscoverCategoryRequest lb_request];
     request.lb_url = kNHHomeCategoryDynamicListAPI;
-    request.category_id = self.categoryId;
+    request.category_id =self.element ? self.element.ID : self.categoryId;
     request.count = 30;
     request.level = 6;
     request.message_cursor = 0;

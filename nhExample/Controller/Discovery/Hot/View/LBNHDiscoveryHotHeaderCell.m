@@ -12,7 +12,7 @@
 
 @property (nonatomic, strong) UILabel *label;
 
-@property (nonatomic, strong) LBNHBaseImageView *imageView;
+@property (nonatomic, strong) LBNHBaseImageView *bannerImageView;
 
 @end
 
@@ -21,18 +21,19 @@
 -(void)setTitle:(NSString *)title{
     _title = title;
     self.label.text = title;
+//    [self sendSubviewToBack:self.bannerImageView];
 }
 
 -(void)setImageUrl:(NSString *)imageUrl{
     _imageUrl = imageUrl;
-    [self.imageView setImagePath:imageUrl placeHolder:nil];
-    [self bringSubviewToFront:self.label];
+    [self.bannerImageView setImagePath:imageUrl placeHolder:nil];
+    [self.contentView bringSubviewToFront:self.label];
 }
 
 -(UILabel *)label{
     if (!_label) {
         _label = [[UILabel alloc] init];
-        [_label showBlueBorder];
+//        [_label showBlueBorder];
         _label.font = kFont(15);
         [self.contentView addSubview:_label];
         [_label mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -44,15 +45,16 @@
     return _label;
 }
 
--(LBNHBaseImageView *)imageView{
-    if (!_imageView) {
-        _imageView = [[LBNHBaseImageView alloc] init];
-        [self.contentView addSubview:_imageView];
-        [_imageView mas_makeConstraints:^(MASConstraintMaker *make) {
+-(LBNHBaseImageView *)bannerImageView{
+    if (!_bannerImageView) {
+        _bannerImageView = [[LBNHBaseImageView alloc] init];
+//        [_bannerImageView showRedBorder];
+        [self.contentView addSubview:_bannerImageView];
+        [_bannerImageView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.edges.equalTo(self);
         }];
     }
-    return _imageView;
+    return _bannerImageView;
 }
 
 @end

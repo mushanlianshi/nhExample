@@ -17,6 +17,8 @@
 
 @property (nonatomic, strong) LBNHDiscoveryBookController *bookController;
 
+@property (nonatomic, strong) LBNHSegmentView *segementView;
+
 @end
 
 @implementation LBNHDiscoveryViewController
@@ -25,20 +27,26 @@
     [super viewDidLoad];
 //    self.view.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:0.4];
     [self setupNaviItems];
+    NSLog(@"self.view frame is %@ ",NSStringFromCGRect(self.view.frame));
 }
+-(void)viewWillLayoutSubviews{
+    [super viewWillLayoutSubviews];
+    NSLog(@"self.view frame is %@ ",NSStringFromCGRect(self.view.frame));
+}
+
 
 -(void)setupNaviItems{
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:ImageNamed(@"nearbypeople") style:UIBarButtonItemStylePlain target:self action:@selector(locationClicked)];
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:ImageNamed(@"foundsearch") style:UIBarButtonItemStylePlain target:self action:@selector(searchClicked)];
 
-    LBNHSegmentView *segementView = [[LBNHSegmentView alloc] initWithItemTitles:@[@"热吧",@"订阅"]];
-    segementView.frame = CGRectMake(0, 0, 140, 35);
-    segementView.SegmentItemSelected = ^(LBNHSegmentView *segView, NSInteger index, NSString *title){
+    _segementView = [[LBNHSegmentView alloc] initWithItemTitles:@[@"热吧",@"订阅"]];
+    _segementView.frame = CGRectMake(0, 0, 140, 35);
+    _segementView.SegmentItemSelected = ^(LBNHSegmentView *segView, NSInteger index, NSString *title){
         self.bookController.view.hidden = index ? NO : YES;
         self.hotController.view.hidden = index ? YES : NO;
     };
-    [segementView clickDefaultIndex:0];
-    self.navigationItem.titleView = segementView;
+    [_segementView clickDefaultIndex:0];
+    self.navigationItem.titleView = _segementView;
 }
 
 
@@ -53,9 +61,27 @@
     
 }
 
+
+-(void)viewWillAppear:(BOOL)animated{
+    [[UINavigationBar appearance] setTintColor:[UIColor clearColor]];
+    [[UINavigationBar appearance] setTranslucent:YES];
+    [self.navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+//    self.segementView.alpha = 0.f;
+}
+-(void)viewWillDisappear:(BOOL)animated{
+    [[UINavigationBar appearance] setTintColor:kCommonTintColor];
+    [[UINavigationBar appearance] setTranslucent:NO];
+    [UINavigationBar appearance].alpha = 1.f;
+}
+
 -(LBNHDiscoveryHotController *)hotController{
     if (!_hotController) {
         _hotController = [[LBNHDiscoveryHotController alloc] init];
+        WS(weakSelf);
+        _hotController.scrollOffsetPoint = ^(CGPoint point){
+            CGFloat alpha = 1 - (point.y > 60 ? 1 : point.y/60);
+            weakSelf.navigationController.navigationBar.subviews.firstObject.alpha = alpha;
+        };
         [self addChildVc:_hotController];
     }
     return _hotController;

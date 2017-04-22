@@ -148,6 +148,7 @@ typedef void(^SDWebImageCalculateSizeBlock)(NSUInteger fileCount, NSUInteger tot
 #pragma mark - Query and Retrieve Ops
 
 /**
+ * 检查图片是否存在
  *  Async check if image exists in disk cache already (does not load the image)
  *
  *  @param key             the key describing the url

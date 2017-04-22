@@ -16,7 +16,7 @@ typedef NS_ENUM(NSInteger, LBThumBottomClickItemType){
     LBThumBottomClickItemTypeShare, //分享
 };
 
-@class LBNHHomeCellFrame,LBNHHomeTableViewCell,LBNHUserInfoModel,LBNHBaseImageView;
+@class LBNHHomeCellFrame,LBNHHomeTableViewCell,LBNHUserInfoModel,LBNHBaseImageView,LBCustomGifImageView,LBCustomLongImageView;
 
 
 /**
@@ -36,8 +36,11 @@ typedef NS_ENUM(NSInteger, LBThumBottomClickItemType){
 
 
 /** 点浏览大图的回调  点击的索引  以及urls */
--(void)homeTableViewCell:(LBNHHomeTableViewCell *)cell didClickedImageView:(UIImageView *)imageView currentIndex:(NSInteger)currentIndex urls:(NSArray <NSURL *>*)urls;
+-(void)homeTableViewCell:(LBNHHomeTableViewCell *)cell didClickedImageView:(LBCustomLongImageView *)imageView currentIndex:(NSInteger)currentIndex urls:(NSArray <NSURL *>*)urls;
 
+
+/** 点浏览gif的回调  点击的索引  以及urls */
+-(void)homeTableViewCell:(LBNHHomeTableViewCell *)cell didClickedGifView:(LBCustomGifImageView *)gifView currentIndex:(NSInteger)currentIndex urls:(NSArray <NSURL *>*)urls;
 
 /** 点播放视频的回调 */
 -(void)homeTableViewCell:(LBNHHomeTableViewCell *)cell didClickedVideo:(NSString *)videoUrl videoCoverImage:(LBNHBaseImageView *)coverImageView;

@@ -72,14 +72,15 @@
         NSInteger kColumnCount = 3;
         NSInteger count = group.large_image_list.count;
         if (count) {
+            CGFloat margin = 15;
+            CGFloat imageW = (kScreenWidth - kBigMargin*2 - margin*(kColumnCount-1))/kColumnCount;
+            CGFloat imageH = imageW;
             for (int i =0; i<count; i++) {
-                NSInteger row = count/kColumnCount;
-                NSInteger col = count % kColumnCount;
-                CGFloat margin = 15;
+                NSInteger row = i/kColumnCount;
+                NSInteger col = i % kColumnCount;
                 //图片的kuandu
-                CGFloat imageW = (kScreenWidth - 20*2 - margin*(col-1))/kColumnCount;
-                CGFloat imageH = imageW;
-                CGFloat imageX = col*(imageW + margin) +2*margin;
+                
+                CGFloat imageX = col*(imageW + margin) +kBigMargin;
                 CGFloat imageY = row*(imageH + margin) +CGRectGetMaxY(self.laughButtonFrame)+2*margin;
                 CGRect rect = CGRectMake(imageX, imageY, imageW, imageH);
                 [self.littleImagesFrameArray addObject:NSStringFromCGRect(rect)];

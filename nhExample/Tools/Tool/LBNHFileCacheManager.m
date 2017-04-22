@@ -41,7 +41,8 @@
     cachePath=[cachePath stringByAppendingPathComponent:fileName];
     //如果文件不存在  我们创建路径 用来保存文件
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachePath isDirectory:nil]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:cachePath withIntermediateDirectories:NO attributes:nil error:nil];
+        //createDirectoryAtPath 创建路径可以一下创建多层路径
+        [[NSFileManager defaultManager] createDirectoryAtPath:cachePath withIntermediateDirectories:YES attributes:nil error:nil];
     }
     return cachePath;
 }

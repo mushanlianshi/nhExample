@@ -20,6 +20,8 @@
 #import "LBUtils.h"
 #import "SDPhotoBrowser.h"
 #import "LBNHHomePublishController.h"
+#import "LBNHLoginController.h"
+#import "LBNHPersonalCenterController.h"
 
 const NSInteger kMinHoriOffset = 100;//横向距离大于100 才可以滑动到下一页
 
@@ -45,7 +47,7 @@ const NSInteger kMinHoriOffset = 100;//横向距离大于100 才可以滑动到�
 /** 记录pan手势最初的位置 */
 @property (nonatomic, assign) CGPoint startPoint;
 
-
+@property (nonatomic, strong) LBNHUserIconView *iconView ;
 
 @end
 
@@ -53,6 +55,14 @@ const NSInteger kMinHoriOffset = 100;//横向距离大于100 才可以滑动到�
 
 -(void)viewWillAppear:(BOOL)animated{
     [LBUtils forBiddenSDWebImageDecode:YES];
+    
+    LBNHUserInfoModel *userInfo = [LBNHUserInfoManager sharedLBNHUserInfoManager].currentLoginUserInfo;
+    //根据用户是否登录状态设置左边的图片
+    if ([[LBNHUserInfoManager sharedLBNHUserInfoManager] isLogin]) {
+        [_iconView setIconUrl:userInfo.avatar_url];
+    }else{
+        _iconView.image = ImageNamed(@"defaulthead");
+    }
 }
 
 -(void)viewWillDisappear:(BOOL)animated{
@@ -67,17 +77,32 @@ const NSInteger kMinHoriOffset = 100;//横向距离大于100 才可以滑动到�
 
 -(void)initNaviBar{
     self.title = @"审核";
-    LBNHUserIconView *iconView = [[LBNHUserIconView alloc] init];
-    iconView.image = ImageNamed(@"defaulthead");
-    iconView.tapHandler = ^(LBNHUserIconView *iconView){
-        
+    _iconView = [[LBNHUserIconView alloc] init];
+//    [_iconView showRedBorder];
+    _iconView.image = ImageNamed(@"defaulthead");
+    WS(weakSelf);
+    _iconView.tapHandler = ^(LBNHUserIconView *iconView){
+        [weakSelf leftItemClicked];
     };
-    iconView.frame = CGRectMake(-10, 0, 35, 35);
+    _iconView.frame = CGRectMake(-10, 0, 35, 35);
     
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:iconView];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_iconView];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:ImageNamed(@"submission") style:UIBarButtonItemStylePlain target:self action:@selector(rightNaviItemClicked)];
     
     NSLog(@"self.frame is %@ ",NSStringFromCGRect(self.view.frame));
+}
+
+-(void)leftItemClicked{
+    if ([[LBNHUserInfoManager sharedLBNHUserInfoManager] isLogin]) {
+        LBNHUserInfoModel *userInfo = [[LBNHUserInfoManager sharedLBNHUserInfoManager] currentLoginUserInfo];
+        LBNHPersonalCenterController *personalVC = [[LBNHPersonalCenterController alloc] initWithUserInfo:userInfo];
+        [self pushToVc:personalVC];
+    }
+    //没有登录 跳转到登录界面
+    else{
+        LBNHLoginController *loginVC = [[LBNHLoginController alloc] init];
+        [self pushToVc:loginVC];
+    }
 }
 
 -(void)loadData{

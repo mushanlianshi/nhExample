@@ -18,19 +18,28 @@
 
 @implementation LBCustomGifImageView
 
-
+-(instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.7];
+    }
+    return self;
+}
 
 /** 设置进度 设置layer的宽度 */
 -(void)setProgress:(CGFloat)progress{
-    _progress = progress;
-    if (_progress == 1) {
-        [self.progressLayer removeFromSuperlayer];
-        _progressLayer = nil;
-        return;
-    }else{
-        UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, self.width*progress, 3)];
-        self.progressLayer.path = path.CGPath;
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _progress = progress;
+        if (_progress == 1) {
+            [self.progressLayer removeFromSuperlayer];
+            _progressLayer = nil;
+            return;
+        }else{
+            UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, self.width*progress, 3)];
+            self.progressLayer.path = path.CGPath;
+        }
+    });
+    
 }
 
 
@@ -43,5 +52,6 @@
     }
     return _progressLayer;
 }
+
 
 @end

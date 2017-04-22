@@ -11,6 +11,9 @@
 #import "LBNHUserInfoModel.h"
 #import "SDImageCache.h"
 #import "SDWebImageDownloader.h"
+#import <AdSupport/AdSupport.h>
+
+#define kLastLaunchAPPTime @"kLastLaunchAPPTime"
 
 @implementation LBUtils
 
@@ -140,7 +143,7 @@
             [attributeString addAttribute:NSForegroundColorAttributeName value:textColor range:allRange];
             [attributeString addAttribute:NSFontAttributeName value:font range:allRange];
             
-            //间距的属性
+            //行间距的属性
             NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
             style.lineSpacing = lineSpace;
             [attributeString addAttribute:NSParagraphStyleAttributeName value:style range:allRange];
@@ -161,6 +164,134 @@
         
     }
     return [[NSAttributedString alloc] init];
+}
+
+
+/**
+ * 获取广告标示
+ @return 广告标示
+ */
++ (NSString *)idfa{
+    NSUUID *uuid = [[ASIdentifierManager sharedManager] advertisingIdentifier];
+    return [uuid UUIDString];
+}
+
+
+/**
+ * 替代UDID的 同一个设备 同一个应用的idfv是一样的
+ */
++ (NSString *)idfv{
+    NSUUID *uuid= [[UIDevice currentDevice] identifierForVendor];
+    return [uuid UUIDString];
+}
+
++(NSString *)uuid{
+    return [NSUUID UUID].UUIDString;
+}
+
++(UIImage *)imageWithColor:(UIColor *)color{
+    CGRect rect = CGRectMake(0.f, 0.f, 1.0f, 1.0f);
+    //已多大的尺寸开始一个上下文
+    UIGraphicsBeginImageContext(rect.size);
+    //获取一个图片上下文
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    //设置填充的颜色
+    CGContextSetFillColorWithColor(context, color.CGColor);
+    //设置填充的区域
+    CGContextFillRect(context, rect);
+    //从上下文中获取一个图片
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    //结束处理图片的上下文
+    UIGraphicsEndImageContext();
+    return image;
+}
+
+/**
+ *  判断字符串是否为空
+ */
++ (BOOL)isBlankString:(NSString *)string {
+    
+    if (string == nil || string == NULL) {
+        return YES;
+    }
+    if ([string isKindOfClass:[NSNull class]]) {
+        return YES;
+    }
+    if ([string isKindOfClass:[NSDictionary class]]) {
+        return YES;
+    }
+    if ([string isKindOfClass:[NSString class]] == NO) {
+        return YES;
+    }
+    if ([[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] == 0) {
+        return YES;
+    }
+    if ([string isEqualToString:@""]) {
+        return YES;
+    }
+    return NO;
+}
+
++(float)folderSizeAtPath:(NSString *)path{
+    NSFileManager *fileManager=[NSFileManager defaultManager];
+    float folderSize;
+    if ([fileManager fileExistsAtPath:path]) {
+        NSArray *childerFiles=[fileManager subpathsAtPath:path];
+        for (NSString *fileName in childerFiles) {
+            NSString *absolutePath=[path stringByAppendingPathComponent:fileName];
+            folderSize +=[self fileSizeAtPath:absolutePath];
+        }
+        　　　　　//SDWebImage框架自身计算缓存的实现
+        CGFloat sdCache = [[SDImageCache sharedImageCache] getSize]/1024.0/1024.0;
+        folderSize+=sdCache;
+        return folderSize;
+    }
+    return 0;
+}
+
++(float)fileSizeAtPath:(NSString *)path{
+    NSFileManager *fileManager=[NSFileManager defaultManager];
+    if([fileManager fileExistsAtPath:path]){
+        long long size=[fileManager attributesOfItemAtPath:path error:nil].fileSize;
+        return size/1024.0/1024.0;
+    }
+    return 0;
+}
+
++(void)clearCache:(NSString *)path{
+    NSFileManager *fileManager=[NSFileManager defaultManager];
+    if ([fileManager fileExistsAtPath:path]) {
+        NSArray *childerFiles=[fileManager subpathsAtPath:path];
+        for (NSString *fileName in childerFiles) {
+            //如有需要，加入条件，过滤掉不想删除的文件
+            NSString *absolutePath=[path stringByAppendingPathComponent:fileName];
+            [fileManager removeItemAtPath:absolutePath error:nil];
+        }
+    }
+    [[SDImageCache sharedImageCache] clearDiskOnCompletion:nil];
+}
+
+/** 每次启动调用保存app启动时间的方法 用来判断两次启动时间间隔的 */
++(void)saveLastLaunchAPPTime{
+    NSDate *nowDate = [NSDate date];
+    long nowTime = [nowDate timeIntervalSince1970];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithLong:nowTime] forKey:kLastLaunchAPPTime];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+/** 获取上次启动app的时间  距离1970 */
++(long)lastLaunchAPPTime{
+    long lastTime = [[[NSUserDefaults standardUserDefaults] objectForKey:kLastLaunchAPPTime] longValue];
+    return lastTime;
+}
+
+/** 获取两次启动的时间差 */
++(long)lastLauchAPPToNow{
+    long lastTime = [[[NSUserDefaults standardUserDefaults] objectForKey:kLastLaunchAPPTime] longValue];
+    NSDate *nowDate = [NSDate date];
+    long nowTime = [nowDate timeIntervalSince1970];
+    return  labs(nowTime - lastTime);
 }
 
 @end

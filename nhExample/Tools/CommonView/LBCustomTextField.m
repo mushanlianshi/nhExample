@@ -58,6 +58,7 @@
 
 -(void)deleteText{
     self.text = @"";
+    self.rightViewMode = UITextFieldViewModeNever;
 }
 #pragma mark 是否显示右边的删除按钮 根据显示的mode来设置
 -(void)showRightImageView:(BOOL)isShow{

@@ -72,4 +72,8 @@ NSString *const kNHUserPublishDraftAPI = @"http://lf.snssdk.com/2/essay/zone/ugc
 #pragma mark - CHECK / 审核
 /** 内涵审核的动态列表*/
 NSString *const kNHCheckDynamicListAPI = @"http://lf.snssdk.com/2/essay/zone/ugc/recent/v1/";;
+
+
+/** 是否展示广告以及广告图片的 */
+NSString *const KNHADInfoAPI = @"http://172.16.20.232:8080/json/ads.json";
 @end

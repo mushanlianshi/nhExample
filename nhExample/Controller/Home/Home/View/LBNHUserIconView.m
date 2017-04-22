@@ -42,7 +42,7 @@
 }
 
 -(void)setIconUrl:(NSString *)iconUrl{
-    [self.imageView setImagePath:iconUrl placeHolder:ImageNamed(@"defaulthead")];
+    [self.imageView setImagePath:iconUrl placeHolder:nil];
 }
 
 -(void)initUI{
@@ -59,6 +59,7 @@
     if (!_imageView) {
         _imageView = [[LBNHBaseImageView alloc] init];
         _imageView.layer.cornerRadius = 17.5;
+//        _imageView.backgroundColor = [UIColor redColor];
 //        _imageView.frame = CGRectMake(0, 0, 35, 35);
         _imageView.clipsToBounds = YES;
         _imageView.contentMode  =UIViewContentModeScaleAspectFill;

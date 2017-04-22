@@ -32,7 +32,8 @@
  */
 -(void)remove;
 
-
+/** 把一个模型转成字典类型 */
+-(NSDictionary *)lbkeyValues;
 
 /**
  字典数组 转模型数组的

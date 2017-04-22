@@ -69,4 +69,7 @@ UIKIT_EXTERN NSString *const kNHUserPublishDraftAPI ;
 #pragma mark - CHECK / 审核
 /** 内涵审核的动态列表*/
 UIKIT_EXTERN NSString *const kNHCheckDynamicListAPI ;
+
+#pragma mark 广告
+UIKIT_EXTERN NSString *const KNHADInfoAPI ;
 @end

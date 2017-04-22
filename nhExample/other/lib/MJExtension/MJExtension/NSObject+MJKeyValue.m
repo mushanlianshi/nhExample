@@ -18,6 +18,8 @@
 
 @implementation NSObject (MJKeyValue)
 
+
+
 #pragma mark - 错误
 static const char MJErrorKey = '\0';
 + (NSError *)mj_error
@@ -42,6 +44,7 @@ static const char MJReferenceReplacedKeyWhenCreatingKeyValuesKey = '\0';
 + (BOOL)mj_isReferenceReplacedKeyWhenCreatingKeyValues
 {
     __block id value = objc_getAssociatedObject(self, &MJReferenceReplacedKeyWhenCreatingKeyValuesKey);
+    //如果不存在  便利所有父类 
     if (!value) {
         [self mj_enumerateAllClasses:^(__unsafe_unretained Class c, BOOL *stop) {
             value = objc_getAssociatedObject(c, &MJReferenceReplacedKeyWhenCreatingKeyValuesKey);
@@ -80,13 +83,14 @@ static NSNumberFormatter *numberFormatter_;
     MJExtensionAssertError([keyValues isKindOfClass:[NSDictionary class]], self, [self class], @"keyValues参数不是一个字典");
     
     Class clazz = [self class];
+    //获取应许和不允许的属性数组
     NSArray *allowedPropertyNames = [clazz mj_totalAllowedPropertyNames];
     NSArray *ignoredPropertyNames = [clazz mj_totalIgnoredPropertyNames];
     
     //通过封装的方法回调一个通过运行时编写的，用于返回属性列表的方法。
     [clazz mj_enumerateProperties:^(MJProperty *property, BOOL *stop) {
         @try {
-            // 0.检测是否被忽略
+            // 0.检测是否被忽略 如果应许的属性数组里  没有这个属性直接返回  如果是被忽略的属性  也直接返回
             if (allowedPropertyNames.count && ![allowedPropertyNames containsObject:property.name]) return;
             if ([ignoredPropertyNames containsObject:property.name]) return;
             

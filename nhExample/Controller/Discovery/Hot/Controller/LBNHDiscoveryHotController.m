@@ -28,6 +28,9 @@
     [super viewDidLoad];
     [self initUI];
     [self loadData];
+    self.automaticallyAdjustsScrollViewInsets = NO;
+    self.edgesForExtendedLayout = UIRectEdgeAll;
+    NSLog(@"self.view frame is %@ ",NSStringFromCGRect(self.view.frame));
 }
 
 -(void)initUI{
@@ -36,18 +39,34 @@
     self.showRefreshIcon = YES;
     self.sepLineColor = kSeparatorColor;
     self.refreshType = LBBaseTableControllRefreshTypeBoth;
+    
 }
+
 
 -(void)viewDidLayoutSubviews{
     NSLog(@"self.view frame si %@ ",NSStringFromCGRect(self.view.frame));
     //计算没有panorama的时候 tableview的位置
-    self.headerView.height = self.headerView.modelsArray.count ? 180.f : 0 ;
-    if (self.headerView.modelsArray.count){
-        self.tableView.frame = CGRectMake(0, 180, kScreenWidth, self.view.height - 180);
+//    self.headerView.height = self.headerView.modelsArray.count ? 180.f : 0 ;
+////    if (self.headerView.modelsArray.count){
+////        self.tableView.frame = CGRectMake(0, 180, kScreenWidth, self.view.height - 180);
+////    }else{
+////        self.tableView.frame = CGRectMake(0, 0, kScreenWidth, self.view.height);
+////    }
+//    self.tableView.frame = self.view.bounds;
+}
+
+-(void)lb_reloadData{
+    if (self.headerView.modelsArray.count) {
+        self.headerView.height = 180.f;
+        //add 必须要设置一遍tableheaderView 才会出效果
+//        [self.tableView beginUpdates];
+        self.tableView.tableHeaderView = self.headerView;
+//        [self.tableView endUpdates];
     }else{
-        self.tableView.frame = CGRectMake(0, 0, kScreenWidth, self.view.height);
+        self.headerView.height = 0.f;
+        self.tableView.tableHeaderView = self.headerView;
     }
-    
+    [super lb_reloadData];
 }
 
 -(void)lb_refresh{
@@ -64,11 +83,13 @@
             self.discoveryModel = [LBNHDiscoveryModel modelWithDictionary:response];
             [MBProgressHUD hidAllHudsInSuperView:self.view];
             self.headerView.modelsArray = self.discoveryModel.rotate_banner.banners;
+//            self.headerView.modelsArray = nil;
             self.dataArray = self.discoveryModel.categories.category_list;
             [self lb_reloadData];
         }else{
             [MBProgressHUD showHintText:@"加载出错，稍后再试" superView:self.view];
         }
+        [self endRefreshIconAnimation];
     }];
 }
 
@@ -79,6 +100,14 @@
         [self.view addSubview:_headerView];
     }
     return _headerView;
+}
+
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    NSLog(@"scrollview contentOffset %@ ",NSStringFromCGPoint(scrollView.contentOffset));
+    if (self.scrollOffsetPoint) {
+        self.scrollOffsetPoint(scrollView.contentOffset);
+    }
 }
 
 
@@ -125,5 +154,9 @@
     return 70;
 }
 
+
+//- (CGFloat)lb_sectionHeaderHeightAtSection:(NSInteger)section{
+//    return self.discoveryModel.rotate_banner.banners.count ? 180.f : 0.f;
+//}
 
 @end

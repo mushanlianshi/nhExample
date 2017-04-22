@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "SDWebImageCompat.h"
 
+/**
+ * 缓存的一些设置  是否压缩  内存缓存等
+ */
 @interface SDImageCacheConfig : NSObject
 
 /**
@@ -28,6 +31,7 @@
 @property (assign, nonatomic) BOOL shouldCacheImagesInMemory;
 
 /**
+ * 缓存时间
  * The maximum length of time to keep an image in the cache, in seconds
  */
 @property (assign, nonatomic) NSInteger maxCacheAge;

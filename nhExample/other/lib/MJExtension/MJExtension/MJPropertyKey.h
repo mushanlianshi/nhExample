@@ -14,7 +14,7 @@ typedef enum {
 } MJPropertyKeyType;
 
 /**
- *  属性的key
+ *  属性的key 根据属性的key获取值
  */
 @interface MJPropertyKey : NSObject
 /** key的名字 */

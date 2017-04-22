@@ -7,7 +7,7 @@
 //
 
 #import "LBBaseTableViewController.h"
-
+@class LBNHDiscoveryCategoryElement;
 
 /**
  * home页点击分类的controller 吐槽神剧、情感点滴类型
@@ -16,5 +16,7 @@
 
 /** 栏目的id */
 -(instancetype)initWithCategoryId:(NSInteger)categoryId;
+
+-(instancetype)initWithCategoryElement:(LBNHDiscoveryCategoryElement *)element;
 
 @end

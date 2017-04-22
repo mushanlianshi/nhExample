@@ -22,6 +22,10 @@
  */
 -(void)didLoginInWithUserInfo:(LBNHUserInfoModel *)userInfo;
 
+/**
+ * 登录成功  保存用户信息 根据字典数据保存
+ */
+-(void)didLoginInWithUserInfoDic:(NSDictionary *)userInfoDic;
 
 /**
  * 退出账号

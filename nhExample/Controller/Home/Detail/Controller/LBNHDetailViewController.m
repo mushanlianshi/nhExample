@@ -22,6 +22,8 @@
     UITableView *_tableView;
 }
 
+@property (nonatomic, strong) LBNHSearchPostsCellFrame *searchCellFrame;
+
 @property (nonatomic, strong) LBNHHomeCellFrame *cellFrame;
 
 @property (nonatomic, strong) LBNHHomeTableViewCell *headerView;
@@ -40,8 +42,6 @@
 -(void)viewDidLoad{
     [self setUpNaviItems];
     self.tableView.tableHeaderView = self.headerView;
-    self.headerView.cellFrame = self.cellFrame;
-    self.headerView.frame = CGRectMake(0, 0, kScreenWidth, self.cellFrame.cellHeight);
     [self loadData];
 }
 
@@ -52,22 +52,42 @@
 }
 
 
-
+-(instancetype)initWithSearchCellFrame:(LBNHSearchPostsCellFrame *)searchCellFrame{
+    self = [super init];
+    if (self) {
+        self.searchCellFrame = searchCellFrame;
+    }
+    return self;
+}
 
 -(instancetype)initWithCellFrame:(LBNHHomeCellFrame *)cellFrame{
     self=[super init];
     if (self) {
-        self.cellFrame = [[LBNHHomeCellFrame alloc] init];
-        [self.cellFrame setModel:cellFrame.model isDetail:YES];
+        self.cellFrame = cellFrame;
         
     }
     return self;
 }
 
 -(void)loadData{
+    //判断是主界面进来的还是搜索界面的  拼装数据
+    if (self.cellFrame) {
+        [self.cellFrame setModel:self.cellFrame.model isDetail:YES];
+        self.headerView.cellFrame = self.cellFrame;
+        self.headerView.frame = CGRectMake(0, 0, kScreenWidth, self.cellFrame.cellHeight);
+    }else if (self.searchCellFrame){
+        LBNHHomeCellFrame *cellFrame = [[LBNHHomeCellFrame alloc] init];
+        LBNHHomeServiceDataElement *model = [[LBNHHomeServiceDataElement alloc] init];
+        model.group = self.searchCellFrame.group;
+        [cellFrame setModel:model isDetail:YES];
+        self.headerView.cellFrame = cellFrame;;
+        self.headerView.frame = CGRectMake(0, 0, kScreenWidth, cellFrame.cellHeight);
+    }
+    
     LBNHDetailCommentRequest *request = [[LBNHDetailCommentRequest alloc] init];
     request.lb_url = kNHHomeDynamicCommentListAPI;
-    request.group_id = _cellFrame.model.group.ID;
+    //判断是搜索跳过来的还是主界面的
+    request.group_id =self.searchCellFrame ? self.searchCellFrame.group.ID : _cellFrame.model.group.ID;
     request.sort = @"hot";
     request.offset = 0;
     [request lb_sendRequestWithHandler:^(BOOL success, id response, NSString *message) {

@@ -695,9 +695,9 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 
         dispatch_semaphore_signal(semaphore);
     }];
-
+    NSLog(@"LBLog  currentThread 111111 log is %@ ",[NSThread currentThread]);
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-
+    NSLog(@"LBLog  currentThread 22222 log is %@ ",[NSThread currentThread]);
     return tasks;
 }
 

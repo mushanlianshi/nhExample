@@ -7,17 +7,34 @@
 //
 
 #import "LBNHBaseImageView.h"
+#import "YYWebImage.h"
 #import "UIImageView+WebCache.h"
-#import "UIImageView+YYWebImage.h"
+#import "UIView+WebCache.h"
+
+//add for gif sdwebimage
+#import "FLAnimatedImage.h"
+#import "FLAnimatedImageView.h"
+
+@interface LBNHBaseImageView ()
+
+@end
 
 
 @implementation LBNHBaseImageView
 
 
+//-(void)setIsLongPicture:(BOOL)isLongPicture{
+//    _isLongPicture = isLongPicture;
+//    if (isLongPicture) {
+//        
+//    }
+//}
+
 /**
  设置图片
  */
 -(void)setImagePath:(NSString *)imagePath{
+    
     [self setImagePath:imagePath placeHolder:nil];
 }
 -(void)setImageURL:(NSURL *)imageURL{
@@ -64,6 +81,7 @@
 }
 -(void)setImageURL:(NSURL *)imageURL placeHolder:(UIImage *)image progressHandler:(ImageProgressHandler)progressHandler finishHandler:(void (^)(NSError *error, UIImage *image))finishHandler{
     
+    //YYimage
 //    [self yy_setImageWithURL:imageURL placeholder:image options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize) {
 //        if (progressHandler) {
 //            progressHandler(receivedSize * 1.0 / expectedSize);
@@ -73,15 +91,31 @@
 //            finishHandler(error, image);
 //        }
 //    }];
-    [self sd_setImageWithURL:imageURL placeholderImage:image options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
+    
+    
+//    [self sd_setShowActivityIndicatorView :YES];
+    
+    
+    //sdwebimage
+    [self sd_setImageWithURL:imageURL placeholderImage:image options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize,NSURL *target) {
         if (progressHandler) {
             progressHandler(receivedSize * 1.0f/expectedSize);
         }
-    } completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
         if (finishHandler) {
             finishHandler(error, image);
         }
     }];
+    
+//    [self sd_setImageWithURL:imageURL placeholderImage:image options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
+//        if (progressHandler) {
+//            progressHandler(receivedSize * 1.0f/expectedSize);
+//        }
+//    } completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+//        if (finishHandler) {
+//            finishHandler(error, image);
+//        }
+//    }];
     
 //    [self sd_setImageWithURL:imageURL placeholderImage:image options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize) {
 //        if (progressHandler) {
@@ -93,4 +127,41 @@
 //        }
 //    }];
 }
+
+-(void)setGifImagePath:(NSString *)imagePath placeHolder:(UIImage *)image progressHandler:(ImageProgressHandler)progressHandler finishHandler:(void (^)(NSError *error, UIImage *image))finishHandler{
+    
+    [self setGifImageURL:[NSURL URLWithString:imagePath] placeHolder:image progressHandler:progressHandler finishHandler:finishHandler];
+
+}
+
+-(void)setGifImageURL:(NSURL *)imageURL placeHolder:(UIImage *)image progressHandler:(ImageProgressHandler)progressHandler finishHandler:(void (^)(NSError *error, UIImage *image))finishHandler{
+    
+    //    [self yy_setImageWithURL:imageURL placeholder:image options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+    //        if (progressHandler) {
+    //            progressHandler(receivedSize * 1.0 / expectedSize);
+    //        }
+    //    } transform:nil completion:^(UIImage * _Nullable image, NSURL * _Nonnull url, YYWebImageFromType from, YYWebImageStage stage, NSError * _Nullable error) {
+    //        if (finishHandler) {
+    //            finishHandler(error, image);
+    //        }
+    //    }];
+    
+//    FLAnimatedImage *animationImage = [FLAnimatedImage animatedImageWithGIFData:[NSData dataWithContentsOfURL:imageURL]];
+//    self.animatedImage = animationImage;
+//    WS(weakSelf);
+//    [self sd_setImageWithURL:imageURL placeholderImage:image options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL * _Nullable targetURL) {
+//        if (progressHandler) {
+//            progressHandler(receivedSize * 1.0f/expectedSize);
+//        }
+//    } completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+//        FLAnimatedImage *animationImage = [FLAnimatedImage animatedImageWithGIFData:UIImageJPEGRepresentation(image, 1.f)];
+////        weakSelf.image = nil;
+////        weakSelf.animatedImage = animationImage;
+//        if (finishHandler) {
+//            finishHandler(error, image);
+//        }
+//    }];
+
+}
+
 @end

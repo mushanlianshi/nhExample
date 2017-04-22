@@ -27,6 +27,7 @@ const NSTimeInterval _YYWebImageProgressiveFadeTime = 0.4;
 
 - (instancetype)init {
     self = [super init];
+    //创建一个信号量
     _lock = dispatch_semaphore_create(1);
     return self;
 }
@@ -79,13 +80,16 @@ const NSTimeInterval _YYWebImageProgressiveFadeTime = 0.4;
 
 - (int32_t)cancelWithNewURL:(NSURL *)imageURL {
     int32_t sentinel;
+    //信号量减1 等待信号 总量少于0的时候就会一直等待  保证同步  等待结束后发送信号量才会可以进来  下一个进来的才会
     dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
     if (_operation) {
         [_operation cancel];
         _operation = nil;
     }
     _imageURL = imageURL;
+    //OSAtomicIncrement32来原子操作级别的增加count数
     sentinel = OSAtomicIncrement32(&_sentinel);
+    //发送一个信号量 让信号总量加1
     dispatch_semaphore_signal(_lock);
     return sentinel;
 }

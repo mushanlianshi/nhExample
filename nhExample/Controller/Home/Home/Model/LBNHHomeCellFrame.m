@@ -75,6 +75,7 @@ static const NSInteger kColumnCount = 3;//默认一行显示3张小图
         CGFloat bigImageY = CGRectGetMaxY(self.laughButtonFrame) +  1.8*kMargin;
         CGFloat bigImageW = kScreenWidth - 20 *2;
         CGFloat bigImageH = bigImageW * model.group.large_image.r_height/model.group.large_image.r_width ;
+        bigImageH = bigImageH > 501 ? 501 :bigImageH;
         self.bigPictureFrame = CGRectMake(bigImageX, bigImageY, bigImageW, bigImageH);
         thumY = CGRectGetMaxY(self.bigPictureFrame) + 1.5*kMargin;
     }else if (model.group.media_type == LBNHHomeServiceDataMediaTypeGif){
@@ -95,14 +96,14 @@ static const NSInteger kColumnCount = 3;//默认一行显示3张小图
         //小图
         NSInteger count = model.group.large_image_list.count;
         if (count) {
+            CGFloat margin = 15;
+            //图片的kuandu
+            CGFloat imageW = (kScreenWidth - kBigMargin*2 - margin*(kColumnCount-1))/kColumnCount;
+            CGFloat imageH = imageW;
             for (int i =0; i<count; i++) {
                 NSInteger row = count/kColumnCount;
                 NSInteger col = count % kColumnCount;
-                CGFloat margin = 15;
-                //图片的kuandu
-                CGFloat imageW = (kScreenWidth - 20*2 - margin*(col-1))/kColumnCount;
-                CGFloat imageH = imageW;
-                CGFloat imageX = col*(imageW + margin) +2*margin;
+                CGFloat imageX = col*(imageW + margin) +kBigMargin;
                 CGFloat imageY = row*(imageH + margin) +CGRectGetMaxY(self.laughButtonFrame)+2*margin;
                 CGRect rect = CGRectMake(imageX, imageY, imageW, imageH);
                 [self.littleImagesFrameArray addObject:NSStringFromCGRect(rect)];

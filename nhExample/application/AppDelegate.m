@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "LBBaseNavigationViewController.h"
 #import "LBNHTabbarViewController.h"
 #import "NSFileManager+LBPath.h"
 #import "SDImageCache.h"
@@ -15,6 +16,14 @@
 #import "YYMemoryCache.h"
 
 #import "NSArray+LBCalculate.h"
+#import "LBUtils.h"
+#import "LBNHFileCacheManager.h"
+#import "LBNHBaseRequest.h"
+#import "LBSDImageCache.h"
+#import "LBCustomADView.h"
+#import "LBWebViewController.h"
+#import "LBGCDUtils.h"
+
 
 @interface AppDelegate ()
 
@@ -26,6 +35,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     [self setHomeBarController];
+    
     NSLog(@"Path caches is %@ ",[NSFileManager cachesPath]);
     NSLog(@"Path caches is %@ ",[NSFileManager cachesURL]);
     NSLog(@"library caches is %@ ",[NSFileManager libraryPath]);
@@ -38,8 +48,90 @@
 //    [dic setValue:@"" forKey:@"hha"];
 //    [dic setValue:nil forKey:@"hha"];
 //    [dic setValue:@"dd" forKey:@"hha"];
+
+    
+    NSLog(@"LBLog idfa ======== %@ ",[LBUtils idfa]);
+    NSLog(@"LBLog idfv ======== %@ ",[LBUtils idfv]);
+    NSLog(@"LBLog UUID ======== %@ ",[LBUtils uuid]);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        NSLog(@"LBLog idfa ======== %@ ",[LBUtils idfa]);
+        NSLog(@"LBLog idfv ======== %@ ",[LBUtils idfv]);
+        NSLog(@"LBLog UUID ======== %@ ",[LBUtils uuid]);
+    });
+    
+    
+    //每次启动清楚sdWebimage的缓存
+//    [[SDImageCache sharedImageCache] clearDiskOnCompletion:nil];
+    //1.记录启动的时间 当下次启动的时间差大于2小时  清楚SDImageCache的缓存  
+//    NSDate *date = [NSDate date];
+//    long dateTimerInterval = [date timeIntervalSince1970];
+//    [LBNHFileCacheManager saveUserData:@(dateTimerInterval) forKey:KAPPLaunchTime];
+//    id lastDate = [LBNHFileCacheManager readUserDataForKey:KAPPLaunchTime];
+//    if (lastDate) {
+//        long lastTime = [lastDate longValue];
+//        if (dateTimerInterval - lastTime > KAPPLaunchTimeOffset) {
+//            [[SDImageCache sharedImageCache] clearDiskOnCompletion:nil];
+//        }
+//    }
+    [self requestADAndShow];
+    [LBUtils saveLastLaunchAPPTime];
     return YES;
 }
+
+-(void)requestADAndShow{
+    //判断下 两次启动时间间隔如果大于一星期  就先不显示   以免显示的广告是过期的
+    id object = [LBNHFileCacheManager readUserDataForKey:KAPPADInfoKey];
+    NSDictionary *adDic ;
+    if (object && [object isKindOfClass:[NSDictionary class]]) {
+        adDic = (NSDictionary *)object;
+    }
+    MyLog(@"read ad info is %@ %@ ",[object description],adDic);
+    if (adDic) {
+        BOOL result = [adDic[@"isOpenAds"] boolValue];
+        NSString *imagePath = adDic[@"image"];
+        UIImage *image = [LBSDImageCache imageFromDiskCacheForKey:imagePath];
+        if (result) {
+            NSLog(@"launch timeoffset is %ld ",[LBUtils lastLauchAPPToNow]);
+            if (image && [LBUtils lastLauchAPPToNow] < KOneWeek) {
+                //显示广告图片
+                LBCustomADView *adView = [[LBCustomADView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+                WS(weakSelf);
+                [adView showADViewImage:image superView:self.window limitTime:5.f clickBlock:^{
+                    LBWebViewController *webViewVC = [[LBWebViewController alloc] initWithURLString:adDic[@"adUrl"] title:adDic[@"title"]];
+                    //设置模态跳转的动画
+                    [webViewVC setModalTransitionStyle:UIModalTransitionStyleFlipHorizontal];
+//                    [weakSelf.window.rootViewController presentViewController:webViewVC animated:NO completion:nil];
+                    [weakSelf.window.rootViewController presentViewController:webViewVC animated:YES completion:nil];
+                }];
+            }
+            else{
+                //下载图片
+                [LBSDImageCache downLoadImageWithUrl:imagePath progress:nil completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
+                    NSLog(@"广告图片下载成功  下次启动可以显示");
+                }];
+            }
+        }
+    }
+    // 每次都请求看是否有数据更新
+    LBNHBaseRequest *request = [LBNHBaseRequest lb_request];
+    request.lb_url = KNHADInfoAPI;
+    [request lb_sendRequestWithHandler:^(BOOL success, id response, NSString *message) {
+        if (success) {
+//            BOOL result = [response[@"isOpenAds"] boolValue];
+//            NSString *imagePath = response[@"image"];
+//            NSDictionary *adDic = (NSDictionary *)response;
+//            [[NSUserDefaults standardUserDefaults] setObject:adDic forKey:KAPPADInfoKey];
+//            [[NSUserDefaults standardUserDefaults] synchronize];
+            
+//            NSDictionary *dic = [[NSUserDefaults standardUserDefaults] objectForKey:KAPPADInfoKey];
+//            NSLog(@"dic i s %@ ",dic);
+            [LBNHFileCacheManager saveUserData:response forKey:KAPPADInfoKey];
+//            [LBNHFileCacheManager saveUserData:response forKey:KAPPADInfoKey];
+        }
+    }];
+}
+
+
 -(void)testGCDGroup{
     dispatch_group_t group = dispatch_group_create();
     dispatch_queue_t queue = dispatch_queue_create("currentThread", DISPATCH_QUEUE_CONCURRENT);
@@ -94,7 +186,9 @@
 -(void)setHomeBarController{
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.backgroundColor = [UIColor whiteColor];
-    self.window.rootViewController = [[LBNHTabbarViewController alloc] init];
+    LBNHTabbarViewController *tabbarVC = [[LBNHTabbarViewController alloc] init];
+//    LBBaseNavigationViewController *navi = [[LBBaseNavigationViewController alloc] initWithRootViewController:tabbarVC];
+    self.window.rootViewController = tabbarVC;
     [self.window makeKeyAndVisible];
 }
 

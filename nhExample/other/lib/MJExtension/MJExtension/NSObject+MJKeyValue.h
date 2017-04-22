@@ -67,6 +67,7 @@
 - (void)mj_objectDidFinishConvertingToKeyValues;
 @end
 
+//遵守KJKeyValue 协议
 @interface NSObject (MJKeyValue) <MJKeyValue>
 #pragma mark - 类方法
 /**

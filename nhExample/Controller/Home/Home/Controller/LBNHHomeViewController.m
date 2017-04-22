@@ -15,6 +15,12 @@
 #import "LBCustomSlideViewController.h"
 #import "LBNHHomeRequest.h"
 #import "LBNHHomePublishController.h"
+#import "LBNHPersonalCenterController.h"
+#import "LBNHLoginController.h"
+#import "LBNHUserInfoManager.h"
+#import "LBNHUserInfoModel.h"
+#import "LBSDImageCache.h"
+#import "LBNHFileCacheManager.h"
 
 
 @interface LBNHHomeViewController ()<LBCustomSlideViewControllerDelegate,LBCustomSlideViewControllerDataSource>
@@ -30,6 +36,8 @@
 /** 存储controllers的数组 */
 @property (nonatomic, strong) NSMutableArray *controllers;
 
+@property (nonatomic, strong) LBNHUserIconView *iconView;
+
 @end
 
 @implementation LBNHHomeViewController
@@ -38,19 +46,36 @@
     [super viewDidLoad];
 //    self.view.backgroundColor = [[UIColor blueColor] colorWithAlphaComponent:0.4];
     [self initTitleUI];
+//    [self testAD];
+//    [self requestADAndShow];
 }
 
 
+
+
+-(void)viewWillAppear:(BOOL)animated{
+    
+    LBNHUserInfoModel *userInfo = [LBNHUserInfoManager sharedLBNHUserInfoManager].currentLoginUserInfo;
+    //根据用户是否登录状态设置左边的图片
+    if ([[LBNHUserInfoManager sharedLBNHUserInfoManager] isLogin]) {
+        [_iconView setIconUrl:userInfo.avatar_url];
+    }else{
+        _iconView.image = ImageNamed(@"defaulthead");
+    }
+}
+
 -(void)initTitleUI{
 //    [self showLoadingView];
-    LBNHUserIconView *userIcon = [[LBNHUserIconView alloc] init];
-    userIcon.image = ImageNamed(@"defaulthead");
-    userIcon.tapHandler = ^(LBNHUserIconView *iconView){
+    _iconView = [[LBNHUserIconView alloc] init];
+    _iconView.image = ImageNamed(@"defaulthead");
+    WS(weakSelf);
+    _iconView.tapHandler = ^(LBNHUserIconView *iconView){
         NSLog(@"图片点击了   是否跳转到个人信息界面");
+        [weakSelf leftItemClicked];
     };
     
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:userIcon];
-    userIcon.frame = CGRectMake(0, 0, 35, 35);
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_iconView];
+    _iconView.frame = CGRectMake(0, 0, 35, 35);
 
     LBNHSegmentView *segmentView = [[LBNHSegmentView alloc] initWithItemTitles:@[@"精选",@"关注"]];
     segmentView.frame = CGRectMake(0, 0, 140, 35);
@@ -70,6 +95,8 @@
 //    LBNHHomeBaseViewController *vc = [[LBNHHomeBaseViewController alloc] initWithUrl:kNHHomeAttentionDynamicListAPI];
 //    [self addChildVc:vc];
 }
+
+
 
 //设置标题
 -(void)setModelsArray:(NSArray *)modelsArray{
@@ -103,9 +130,20 @@
     
 }
 
+#pragma mark 左右导航栏点击事件
 -(void)leftItemClicked{
-    NSLog(@"defaulthead ====== ");
+    if ([[LBNHUserInfoManager sharedLBNHUserInfoManager] isLogin]) {
+        LBNHUserInfoModel *userInfo = [[LBNHUserInfoManager sharedLBNHUserInfoManager] currentLoginUserInfo];
+        LBNHPersonalCenterController *personalVC = [[LBNHPersonalCenterController alloc] initWithUserInfo:userInfo];
+        [self pushToVc:personalVC];
+    }
+    //没有登录 跳转到登录界面
+    else{
+        LBNHLoginController *loginVC = [[LBNHLoginController alloc] init];
+        [self pushToVc:loginVC];
+    }
 }
+
 -(void)rightItemClicked{
     NSLog(@"编辑按钮点击了=====");
     LBNHHomePublishController *publishVc = [[LBNHHomePublishController alloc] init];

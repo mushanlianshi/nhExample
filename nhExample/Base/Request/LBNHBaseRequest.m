@@ -49,11 +49,14 @@
         
     //2.判断是post还是get请求
         if (self.isPost) {
-            [LBNHRequestManager POST:urlString parameters:params responseSerializerType:LBResponseSerializerTypeJSON successHandler:^(id response) {
-                [self response:response handler:requestHander];
-            } failureHandler:^(NSError *error) {
-                
-            }];
+            //2.1 且图片数组为空的时候才走这一步   不为空  走下面上传图片的
+            if (self.lb_imagesArray.count == 0) {
+                [LBNHRequestManager POST:urlString parameters:params responseSerializerType:LBResponseSerializerTypeJSON successHandler:^(id response) {
+                    [self response:response handler:requestHander];
+                } failureHandler:^(NSError *error) {
+                    
+                }];
+            }
         }else{
             [LBNHRequestManager GET:urlString parameters:params responseSerializerType:LBResponseSerializerTypeJSON successHandler:^(id response) {
                 [self response:response handler:requestHander];
@@ -82,7 +85,7 @@
 }
 
 -(void)response:(id)response handler:(LBBaseRequestSuccessHandler)handler{
-    //1.重新请求
+    //1.重新请求 和服务端定义的字段
     if ([response[@"message"] isEqualToString:@"retry"]) {
         [self lb_sendRequestWithHandler:handler];
         return;
@@ -126,9 +129,10 @@
     params[@"aid"] = @"7";
     params[@"count"] = @"50";
     params[@"max_time"] = [NSString stringWithFormat:@"%.2f", [[NSDate date] timeIntervalSince1970]];
-    
+//    NSLog(@"mj_keyValues is %@ ",self.mj_keyValues);
+    //添加字典
     [params addEntriesFromDictionary:self.mj_keyValues];
-    
+//    NSLog(@"params is %@ ",params);
     if ([params.allKeys containsObject:@"nh_delegate"]) {
         [params removeObjectForKey:@"nh_delegate"];
     }

@@ -37,9 +37,12 @@ static char TAG_ACTIVITY_SHOW;
     NSString *validOperationKey = operationKey ?: NSStringFromClass([self class]);
     [self sd_cancelImageLoadOperationWithKey:validOperationKey];
     objc_setAssociatedObject(self, &imageURLKey, url, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    
+//    NSLog(@" SDWebImageDelayPlaceholder is %d ",options);
+//    NSLog(@" SDWebImageDelayPlaceholder is %lu ",(unsigned long)SDWebImageDelayPlaceholder);
+//    NSLog(@" SDWebImageDelayPlaceholder is %d ",options & SDWebImageDelayPlaceholder);
     if (!(options & SDWebImageDelayPlaceholder)) {
         dispatch_main_async_safe(^{
+            //1.设置占位图  以及回调
             [self sd_setImage:placeholder imageData:nil basedOnClassOrViaCustomSetImageBlock:setImageBlock];
         });
     }

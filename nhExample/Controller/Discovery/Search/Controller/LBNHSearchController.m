@@ -5,7 +5,7 @@
 //  Created by liubin on 17/4/6.
 //  Copyright © 2017年 liubin. All rights reserved.
 //
-
+NSString  *const searchTableName = @"searchHistory";
 #import "LBNHSearchController.h"
 #import "LBCustomTextField.h"
 #import "LBNHCustomNoDataEmptyView.h"
@@ -21,6 +21,11 @@
 #import "LBNHPersonalCenterController.h"
 #import "UITableView+FDTemplateLayoutCell.h"
 #import "LBNHSearchPostsCellFrame.h"
+#import "BGFMDB.h"
+#import "LBNHSearchModel.h"
+#import "LBCustomSearchHistoryView.h"
+#import "LBDiscoveryCategoryController.h"
+#import "LBNHDetailViewController.h"
 
 @interface LBNHSearchController ()<UITextFieldDelegate,LBNHHomeTableViewCellDelegate,LBNHSearchLimitFriendsCellDelegate>
 
@@ -49,7 +54,8 @@
 /** 好友是否展开   如果展开只显示他自己  否则都显示 */
 @property (nonatomic, assign) BOOL isFirendLineExpand;
 
-
+/** 历史搜索记录view */
+@property (nonatomic, strong) LBCustomSearchHistoryView *historyView;
 
 @end
 
@@ -112,7 +118,7 @@
     personRequest.lb_url = kNHDiscoverSearchUserListAPI;
     personRequest.keyword = searchText;
     [personRequest lb_sendRequestWithHandler:^(BOOL success, id response, NSString *message) {
-        NSLog(@"LBLog search 段友搜索结束");
+        NSLog(@"LBLog  11111  search 段友搜索结束");
         if (success) {
             [self.dataArray removeAllObjects];
             self.dataArray = [LBNHUserInfoModel modelArrayWithArray:response];
@@ -126,8 +132,8 @@
     contentRequest.lb_url = kNHDiscoverSearchDynamicListAPI;
     contentRequest.keyword = searchText;
     [contentRequest lb_sendRequestWithHandler:^(BOOL success, id response, NSString *message) {
-        NSLog(@"LBLog search 段友帖子结束");
-        if (success) {
+        NSLog(@"LBLog 22222 search 段友帖子结束");
+        if (success && [response isKindOfClass:[NSDictionary class]]) {
             [self clearArrays];
             self.textPostsArray = [LBNHHomeServiceDataElementGroup modelArrayWithArray:response[@"text"]];
             self.imagePostsArray = [LBNHHomeServiceDataElementGroup modelArrayWithArray:response[@"image"]];
@@ -159,7 +165,7 @@
     columnRequest.lb_url = kNHDiscoverSearchHotDraftListAPI;
     columnRequest.keyword = searchText;
     [columnRequest lb_sendRequestWithHandler:^(BOOL success, id response, NSString *message) {
-        NSLog(@"LBLog search 段友栏目结束");
+        NSLog(@"LBLog 33333333 search 段友栏目结束");
         if (success) {
             self.hotColumnsArray = [LBNHDiscoveryCategoryElement modelArrayWithArray:response];
         }
@@ -172,6 +178,8 @@
         [self hiddenLoadingView];
         [self lb_reloadData];
     });
+    
+
 }
 
 
@@ -212,7 +220,7 @@
         return 1;
     }
     
-#warning 可能存在bug 当数组为0 时  section少1 导致对齐错乱  所以用三目来算下是否有 没有返回下一个  //不用这种方式  用高度来控制
+//#warning 可能存在bug 当数组为0 时  section少1 导致对齐错乱  所以用三目来算下是否有 没有返回下一个  //不用这种方式  用高度来控制
     if (section == 2) {
 //        return self.textPostsArray.count ? self.textPostsArray.count:(self.imagePostsArray.count ? self.imagePostsArray.count :self.videoPostsArray.count);
         return self.textPostsArray.count;
@@ -278,7 +286,34 @@
 
 /** 点击某行*/
 - (void)lb_didSelectedCellAtIndexPath:(NSIndexPath *)indexPath tableViewCell:(UITableViewCell *)tableViewCell{
+    if (self.isFirendLineExpand) {
+        LBNHPersonalCenterController *personalVC = [[LBNHPersonalCenterController alloc] initWithUserInfo:self.dataArray[indexPath.row]];
+        [self pushToVc:personalVC];
+        return;
+    }
     
+    //栏目
+    if (indexPath.section == 0) {
+        LBDiscoveryCategoryController *categoryVC = [[LBDiscoveryCategoryController alloc] initWithCategoryElement:self.hotColumnsArray[indexPath.row]];
+        [self pushToVc:categoryVC];
+        return;
+    }
+    
+    if (indexPath.section == 1) {
+        return;
+    }
+    LBNHSearchPostsCellFrame *cellFrame ;
+    if (indexPath.section == 2) {
+        cellFrame = self.textPostsCellFrameArray[indexPath.row];
+    }
+    if (indexPath.section == 3) {
+        cellFrame = self.imagePostsCellFrameArray[indexPath.row];
+    }
+    if (indexPath.section ==4) {
+        cellFrame = self.videoPostsCellFrameArray[indexPath.row];
+    }
+    LBNHDetailViewController *detailVC = [[LBNHDetailViewController alloc] initWithSearchCellFrame:cellFrame];
+    [self pushToVc:detailVC];
 }
 
 - (CGFloat)lb_heightAtIndexPath:(NSIndexPath *)indexPath{
@@ -402,10 +437,85 @@
     return _emptyView;
 }
 
+-(LBCustomSearchHistoryView *)historyView{
+    if (!_historyView) {
+        _historyView = [[LBCustomSearchHistoryView alloc] init];
+        WS(weakSelf);
+        _historyView.searchContent = ^(NSString *content){
+            weakSelf.leftTextField.text = content;
+        };
+    }
+    return _historyView;
+}
+
+
 #pragma mark textField的代理
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     [textField resignFirstResponder];
     [self searchWithText:textField.text];
+//    LBNHSearchModel *model = [[LBNHSearchModel alloc] init];
+//    model.content = textField.text;
+//    model.timeStap = [[NSDate date] timeIntervalSince1970];
+//    [[BGFMDB intance] saveObject:textField.text complete:^(BOOL isSuccess) {
+//        NSLog(@"数据保存成功==== %d ",isSuccess);
+//    }];
+    if (!textField.text || textField.text.length<1) return YES;
+    [self insertToTable:textField.text];
+    
+    [self.historyView dismiss];
+    return YES;
+}
+
+-(void)insertToTable:(NSString *)content{
+    [[BGFMDB intance] executeSQL:[NSString stringWithFormat:@"create table if not exists %@ (id integer primary key autoincrement,%@ text unique)",searchTableName,@"content"] complete:^(BOOL isSuccess) {
+        NSLog(@"create DB issuccess %d ",isSuccess);
+    }];
+    [[BGFMDB intance] insertIntoTableName:searchTableName Dict:@{@"content":content} complete:^(BOOL isSuccess) {
+        NSLog(@"数据保存成功==== %d ",isSuccess);
+    }];
+}
+
+
+
+
+- (void)textFieldDidEndEditing:(UITextField *)textField{
+    NSLog(@"数据textFieldDidEndEditing成功====  ");
+    [self.historyView dismiss];
+}
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
+    WS(weakSelf);
+    [[BGFMDB intance] queryWithTableName:searchTableName complete:^(NSArray *array) {
+        NSLog(@"search History is %@ ",array);
+        if (array.count>0) {
+            NSMutableArray *objects = [NSMutableArray new];
+            for (NSDictionary *dic in array) {
+                [objects addObject:dic[@"content"]];
+            }
+            self.historyView.contentsArray = [objects.copy reverseObjectEnumerator].allObjects;
+        }
+        
+        if (array.count > 5) {
+            [weakSelf.historyView showWithHeight:5 * 30 upView:self.leftTextField];
+        }else{
+            [weakSelf.historyView showWithHeight:array.count * 30 upView:self.leftTextField];
+        }
+    }];
+    
+//    [[BGFMDB intance] queryAllObject:[NSString class] complete:^(NSArray *array) {
+//        if (array.count>0) {
+////            NSMutableArray *objects = [NSMutableArray new];
+////            for (LBNHSearchModel *model in array) {
+////                [objects addObject:model.content];
+////            }
+//            self.historyView.contentsArray = array.copy;
+//            //最多显示5条历史记录
+//            if (array.count > 5) {
+//                [weakSelf.historyView showWithHeight:5 * 30 upView:self.leftTextField];
+//            }else{
+//                [weakSelf.historyView showWithHeight:array.count * 30 upView:self.leftTextField];
+//            }
+//        }
+//    }];
     return YES;
 }
 
@@ -446,6 +556,10 @@
         _videoPostsCellFrameArray = [NSMutableArray new];
     }
     return _videoPostsCellFrameArray;
+}
+
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    NSLog(@"touchBegan ===============");
 }
 
 @end

@@ -97,13 +97,16 @@ static int _YYWebImageHighlightedSetterKey;
                  transform:(YYWebImageTransformBlock)transform
                 completion:(YYWebImageCompletionBlock)completion {
     if ([imageURL isKindOfClass:[NSString class]]) imageURL = [NSURL URLWithString:(id)imageURL];
+    //1.获取图片管理器
     manager = manager ? manager : [YYWebImageManager sharedManager];
     
+    //2.获取图片信息  没有创建
     _YYWebImageSetter *setter = objc_getAssociatedObject(self, &_YYWebImageSetterKey);
     if (!setter) {
         setter = [_YYWebImageSetter new];
         objc_setAssociatedObject(self, &_YYWebImageSetterKey, setter, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
+    //3.取消当前正在下载的任务
     int32_t sentinel = [setter cancelWithNewURL:imageURL];
     
     _yy_dispatch_sync_on_main_queue(^{

@@ -32,15 +32,20 @@ MJExtensionCodingImplementation
 }
 
 -(void)archive{
-    [LBNHFileCacheManager saveObjcet:self byFileName:[self description]];
+    [LBNHFileCacheManager saveObjcet:self byFileName:[self.class description]];
 }
 
 -(id)unArchive{
-    return [LBNHFileCacheManager getObjectByFileName:[self description]];
+    return [LBNHFileCacheManager getObjectByFileName:[self.class description]];
 }
 
 -(void)remove{
-    [LBNHFileCacheManager removeObjectByFileName:[self description]];
+    [LBNHFileCacheManager removeObjectByFileName:[self.class description]];
+}
+
+
+-(NSDictionary *)lbkeyValues{
+    return [self mj_keyValues];
 }
 
 /**

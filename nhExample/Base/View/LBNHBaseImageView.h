@@ -13,13 +13,23 @@
 typedef void(^ImageProgressHandler)(CGFloat progress);
 
 #import <UIKit/UIKit.h>
+#import "YYAnimatedImageView.h"
+#import "FLAnimatedImageView.h"
+
+/**
+ 网络基础类的imageView  继承YYAnimatedImageView  主要为了处理gif动画
+ * //        _gifPicture.autoPlayAnimatedImage = NO;  设置不自动播放gif图  需要的时候在调用startAnimating 来播放
+ [self.gifPicture startAnimating];
+ */
+@interface LBNHBaseImageView : YYAnimatedImageView
+//@interface LBNHBaseImageView : UIImageView
+//@interface LBNHBaseImageView : FLAnimatedImageView
 
 
 /**
- 网络基础类的imageView
+ * 专门设置是不是长图片的
  */
-@interface LBNHBaseImageView : UIImageView
-
+//@property (nonatomic, assign) BOOL isLongPicture;
 
 /**
  设置图片
@@ -49,5 +59,8 @@ typedef void(^ImageProgressHandler)(CGFloat progress);
 -(void)setImagePath:(NSString *)imagePath placeHolder:(UIImage *)image progressHandler:(ImageProgressHandler)progressHandler finishHandler:(void (^)(NSError * error, UIImage *image))finishHandler;
 -(void)setImageURL:(NSURL *)imageURL placeHolder:(UIImage *)image progressHandler:(ImageProgressHandler)progressHandler finishHandler:(void (^)(NSError *error, UIImage *image))finishHandler;
 
+
+//-(void)setGifImagePath:(NSString *)imagePath placeHolder:(UIImage *)image progressHandler:(ImageProgressHandler)progressHandler finishHandler:(void (^)(NSError *error, UIImage *image))finishHandler;
+//-(void)setGifImageURL:(NSURL *)imageURL placeHolder:(UIImage *)image progressHandler:(ImageProgressHandler)progressHandler finishHandler:(void (^)(NSError *error, UIImage *image))finishHandler;
 
 @end

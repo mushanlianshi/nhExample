@@ -18,6 +18,9 @@
 #import "LBNHHomeGoldCommentView.h"
 #import "LBUtils.h"
 #import "LBNHSearchPostsCellFrame.h"
+#import "LBCustomLongImageView.h"
+#import "LBCustomGifImageView.h"
+#import "UIImage+SubImage.h"
 
 #define kBottomBtnTextColor [UIColor colorWithRed:0.55f green:0.55f blue:0.55f alpha:1.00f]
 
@@ -46,10 +49,11 @@ static const NSInteger kLittleImageStartTag = 100;
 
 
 /** 大图 */
-@property (nonatomic, strong) LBNHBaseImageView  *bigPicture;
+//@property (nonatomic, strong) LBNHBaseImageView  *bigPicture;
+@property (nonatomic, strong) LBCustomLongImageView  *bigPicture;
 
 /** gif图片 */
-@property (nonatomic, strong) LBNHBaseImageView  *gifPicture;
+@property (nonatomic, strong) LBCustomGifImageView  *gifPicture;
 
 /** 视频 */
 @property (nonatomic, strong) LBNHHomeVideoCoverImageView *videCoverIV;
@@ -157,14 +161,46 @@ static const NSInteger kLittleImageStartTag = 100;
         case LBNHHomeServiceDataMediaTypeLargeImage:
             {
                 LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =group.large_image.url_list.firstObject;
-                [self.bigPicture setImagePath:imageUrlModel.url placeHolder:nil];
+//                [self.bigPicture setImagePath:imageUrlModel.url placeHolder:nil];
+                WS(weakSelf);
+//                [self.bigPicture showRedBorder];
+                [self.bigPicture setImagePath:imageUrlModel.url placeHolder:nil finishHandler:^(NSError *error, UIImage *image) {
+//                    NSLog(@"LBLog yyimage image url is %@ ",imageUrlModel.url);
+//                    NSLog(@"LBLog yyimage image.size is %@ ",NSStringFromCGSize(image.size));
+//                    NSLog(@"LBLog yyimage image.size scale is %f ",(image.scale));
+                    if (image && cellFrame.bigPictureFrame.size.height >=500) {
+                        //记录原来的长图
+                        weakSelf.bigPicture.originalLongImage = image;
+                        //获取裁剪位置的图片  需要计算需要裁剪的位置  不能用image的尺寸来算  和实际下载下来的不一致  按服务器返回的宽高算
+//                        CGImageRef newImage = CGImageCreateWithImageInRect(image.CGImage, CGRectMake(0, 0, image.size.width, cellFrame.bigPictureFrame.size.height*image.size.width/cellFrame.bigPictureFrame.size.width));
+                        UIImage *longTopImage = [image subImageWithRect:CGRectMake(0, 0, cellFrame.model.group.large_image.r_width, cellFrame.bigPictureFrame.size.height*cellFrame.model.group.large_image.r_width/cellFrame.bigPictureFrame.size.width)];
+                        weakSelf.bigPicture.image = longTopImage;
+                        //记录当前裁剪后的image
+                        weakSelf.bigPicture.cutTopImage = longTopImage;
+                    }
+                }];
+//                [self.bigPicture setImagePath:@"http://172.16.20.232:8080/image/long.png" placeHolder:nil];
                 self.bigPicture.frame = cellFrame.bigPictureFrame;
+                
             }
             break;
         case LBNHHomeServiceDataMediaTypeGif:
         {
+//            LBNHHomeServiceDataElementGroupLargeImageUrl
             LBNHHomeServiceDataElementGroupLargeImageUrl *imageUrlModel =group.large_image.url_list.firstObject;
-            [self.gifPicture setImagePath:imageUrlModel.url placeHolder:nil];
+            WS(weakSelf);
+            
+            [self.gifPicture setImagePath:imageUrlModel.url placeHolder:nil progressHandler:^(CGFloat progress) {
+//                NSLog(@"gif picture is %f  %@ ",progress,imageUrlModel.url.description);
+//                NSLog(@"currentThread log is %@ ",[NSThread currentThread]);
+//                @synchronized (@"progress") {
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+                        weakSelf.gifPicture.progress = progress;
+//                    });
+//                }
+                
+                
+            } finishHandler:nil];
             self.gifPicture.frame = cellFrame.gifPictureFrame;
         }
             break;
@@ -188,6 +224,8 @@ static const NSInteger kLittleImageStartTag = 100;
                 }
                 imageView.frame = CGRectFromString(rectString);
                 imageView.userInteractionEnabled = YES;
+//                [imageView showRedBorder];
+                NSLog(@"little imageFrame is %d  %@ ",i,NSStringFromCGRect(imageView.frame));
                 imageView.tag = i+100; //标记tag  用来下面移除的
                 UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(littleImageTapped:)];
                 [imageView addGestureRecognizer:tapGesture];
@@ -220,6 +258,7 @@ static const NSInteger kLittleImageStartTag = 100;
     [self.thumButton setImage:ImageNamed(group.user_digg?@"digupicon_textpage_press":@"digupicon_textpage") forState:UIControlStateNormal];
     [self.thumButton setTitleColor:(group.user_digg?kCommonHighLightRedColor:kCommonGrayTextColor) forState:UIControlStateNormal];
     self.thumButton.frame = cellFrame.thumButtonFrame;
+    
     
     //踩
     [self.stepButton setTitle:[self dealCountWithForrmater:group.bury_count] forState:UIControlStateNormal];
@@ -367,15 +406,31 @@ static const NSInteger kLittleImageStartTag = 100;
     return _contentLabel;
 }
 
--(LBNHBaseImageView *)bigPicture{
+-(LBCustomLongImageView *)bigPicture{
     if (!_bigPicture ) {
-        _bigPicture = [[LBNHBaseImageView alloc] init];
+        _bigPicture = [[LBCustomLongImageView alloc] init];
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(largeImageTapped:)];
         [_bigPicture addGestureRecognizer:tapGesture];
         _bigPicture.userInteractionEnabled = YES;
+        //add for 点击查看长图
+        self.bigPicture.contentMode = UIViewContentModeScaleAspectFit;
+        self.bigPicture.clipsToBounds = YES;
         [self.contentView addSubview:_bigPicture];
     }
     return _bigPicture;
+}
+
+-(LBCustomGifImageView *)gifPicture{
+    if (!_gifPicture) {
+        _gifPicture = [[LBCustomGifImageView alloc] init];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(gifImageTapped:)];
+        [_gifPicture addGestureRecognizer:tapGesture];
+        _gifPicture.userInteractionEnabled = YES;
+////        _gifPicture.autoPlayAnimatedImage = NO;
+//            [self.gifPicture startAnimating];
+        [self.contentView addSubview:_gifPicture];
+    }
+    return _gifPicture;
 }
 
 -(LBNHHomeVideoCoverImageView *)videCoverIV{
@@ -549,13 +604,22 @@ static const NSInteger kLittleImageStartTag = 100;
 #pragma mark 图片点击查看大图
 /** 点击一张图片查看大图 */
 -(void)largeImageTapped:(UITapGestureRecognizer *)tapGesture{
-    LBNHBaseImageView *bigPicture = (LBNHBaseImageView *)[tapGesture view];
+    LBCustomLongImageView *bigPicture = (LBCustomLongImageView *)[tapGesture view];
     WS(weakSelf);
     LBNHHomeServiceDataElementGroupLargeImageUrl *imageModel= self.cellFrame.model.group.large_image.url_list.firstObject;
     if ([weakSelf.delegate respondsToSelector:@selector(homeTableViewCell:didClickedImageView:currentIndex:urls:)]) {
         [weakSelf.delegate homeTableViewCell:weakSelf didClickedImageView:bigPicture currentIndex:0 urls:@[[NSURL URLWithString:imageModel.url]]];
     }
     NSLog(@"大图点击的图片地址 ：%@ ",imageModel.url);
+}
+
+-(void)gifImageTapped:(UITapGestureRecognizer *)tapGesture{
+    LBCustomGifImageView *gifView = (LBCustomGifImageView *)[tapGesture view];
+    WS(weakSelf);
+    LBNHHomeServiceDataElementGroupLargeImageUrl *imageModel= self.cellFrame.model.group.large_image.url_list.firstObject;
+    if ([weakSelf.delegate respondsToSelector:@selector(homeTableViewCell:didClickedGifView:currentIndex:urls:)]) {
+        [weakSelf.delegate homeTableViewCell:weakSelf didClickedGifView:gifView currentIndex:0 urls:@[[NSURL URLWithString:imageModel.url]]];
+    }
 }
 /** 点击九宫格图片查看大图 */
 -(void)littleImageTapped:(UITapGestureRecognizer *)tapGesture{

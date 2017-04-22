@@ -95,7 +95,9 @@
             WS(weakSelf);
             [self.gifImageView setImagePath:urlModel.url placeHolder:nil progressHandler:^(CGFloat progress) {
                 NSLog(@"gif progress is %f %@",progress,group.content);
-                weakSelf.gifImageView.progress =progress;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    weakSelf.gifImageView.progress =progress;
+                });
             } finishHandler:^(NSError * error, UIImage * image) {
                 
             }];
