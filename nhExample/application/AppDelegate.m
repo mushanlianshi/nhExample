@@ -36,6 +36,8 @@
     // Override point for customization after application launch.
     [self setHomeBarController];
     
+    NSLog(@"LBLog version 11111111 ================");
+    
     NSLog(@"Path caches is %@ ",[NSFileManager cachesPath]);
     NSLog(@"Path caches is %@ ",[NSFileManager cachesURL]);
     NSLog(@"library caches is %@ ",[NSFileManager libraryPath]);
