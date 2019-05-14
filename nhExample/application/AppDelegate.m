@@ -41,6 +41,9 @@
     
     NSLog(@"LBLog version 2222222 =========================");
     
+    
+    NSLog(@"LBlog version 333333333 ================ ");
+    
     NSLog(@"Path caches is %@ ",[NSFileManager cachesPath]);
     NSLog(@"Path caches is %@ ",[NSFileManager cachesURL]);
     NSLog(@"library caches is %@ ",[NSFileManager libraryPath]);
